@@ -1,167 +1,77 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Maintenance Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pending Activities</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Roboto', sans-serif;
-      background: url('tool.jpg') no-repeat center center fixed;
-      background-size: cover;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
       color: #333;
-    }header {
-  background: linear-gradient(135deg, #4b0082, #800080);
-  color: white;
-  text-align: center;
-  padding: 20px 10px;
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-  font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
+    }
 
-.action-bar {
-  background-color: #1e3a8a;
-  color: white;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  font-weight: bold;
-}
+    h2 {
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
 
-.action-bar span {
-  margin-left: 10px;
-  font-size: 16px;
-}
+    .activity {
+      border-left: 6px solid;
+      padding: 12px 16px;
+      margin: 10px 0;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
 
-.activity-menu {
-  display: none;
-  background-color: #f9f9f9;
-  padding: 10px 16px;
-  border-bottom: 2px solid #ddd;
-}
+    .upcoming {
+      border-color: red;
+      background-color: #ffe5e5;
+    }
 
-.activity-menu button {
-  display: block;
-  width: 100%;
-  background-color: #1e3a8a;
-  color: white;
-  padding: 10px;
-  margin: 6px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+    .pending {
+      border-color: orange;
+      background-color: #fff8e1;
+    }
 
-.activity-menu button:hover {
-  background-color: #2c4db0;
-}
-
-.status-cards {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  padding: 18px 20px;
-  border-left: 8px solid;
-}
-
-.pending {
-  border-color: red;
-}
-
-.in-progress {
-  border-color: orange;
-}
-
-.completed {
-  border-color: green;
-}
-
-.card h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-
-.card p {
-  margin: 0;
-  font-size: 15px;
-  color: #555;
-}
-
-@media (max-width: 600px) {
-  .status-cards {
-    padding: 10px;
-  }
-
-  .card h3 {
-    font-size: 16px;
-  }
-
-  .card p {
-    font-size: 14px;
-  }
-
-  .activity-menu button {
-    font-size: 14px;
-    padding: 8px;
-  }
-}
-
+    .activity span {
+      display: block;
+      font-size: 14px;
+      margin-top: 6px;
+      color: #555;
+    }
   </style>
 </head>
-<body>  <header>
-    Indane Bottling Plant, Belgaum BP — Team NS Engineers
-  </header>  <div class="action-bar" onclick="toggleMenu()">
-    ☰ <span>Activity Menu</span>
-  </div>  <div class="activity-menu" id="activityMenu">
-    <button onclick="openActivity('Breakdown Reporting')">Breakdown Reporting</button>
-    <button onclick="openActivity('Weekly Activity')">Weekly Activity</button>
-    <button onclick="openActivity('Monthly Activity')">Monthly Activity</button>
-    <button onclick="openActivity('Quarterly Activity')">Quarterly Activity</button>
-    <button onclick="openActivity('Half Yearly')">Half Yearly</button>
-    <button onclick="openActivity('Yearly')">Yearly</button>
-    <button onclick="openActivity('Assign Task')">Assign Task</button>
-    <button onclick="openActivity('Spares Availability')">Spares Availability</button>
-    <button onclick="openActivity('Procure Spares')">Procure Spares</button>
-  </div>  <div class="status-cards" id="statusCards">
-    <div class="card pending">
-      <h3>Pending Tasks</h3>
-      <p>6 activities have pending items. Please follow up urgently.</p>
-    </div>
-    <div class="card in-progress">
-      <h3>In Progress</h3>
-      <p>4 tasks are actively being worked on this week.</p>
-    </div>
-    <div class="card completed">
-      <h3>Completed</h3>
-      <p>9 tasks were successfully completed and logged.</p>
-    </div>
-  </div>  <script>
-    function toggleMenu() {
-      const menu = document.getElementById('activityMenu');
-      const cards = document.getElementById('statusCards');
-      const isOpen = menu.style.display === 'block';
+<body>
 
-      menu.style.display = isOpen ? 'none' : 'block';
-      cards.style.display = isOpen ? 'block' : 'none';
-    }
+  <h2>🔔 Pending & Upcoming Activities</h2>
+  <div id="activityList">
+    <!-- JS inserts here -->
+  </div>
 
-    function openActivity(activityName) {
-      alert('Opening: ' + activityName);
-      // Logic to load real activity page here.
+  <script>
+    // Dummy data for demo – replace with localStorage or API data
+    const activities = [
+      { name: 'Battery Gravity Check', date: '2025-06-30', status: 'upcoming' },
+      { name: 'CP Reading', date: '2025-06-27', status: 'pending' },
+      { name: 'Fire Hydrant Flushing', date: '2025-07-02', status: 'upcoming' }
+    ];
+
+    const listDiv = document.getElementById('activityList');
+
+    if (activities.length === 0) {
+      listDiv.innerHTML = "<p>No pending or upcoming activities found.</p>";
+    } else {
+      activities.forEach(act => {
+        const div = document.createElement('div');
+        div.className = `activity ${act.status}`;
+        div.innerHTML = `<strong>${act.name}</strong><span>Date: ${act.date}</span>`;
+        listDiv.appendChild(div);
+      });
     }
-  </script></body>
+  </script>
+</body>
 </html>
