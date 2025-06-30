@@ -1,127 +1,120 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Breakdown Reporting</title>
-<style>
-body { font-family: Arial; background: #f4f7f9; padding: 20px; }
-table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 30px; }
-th, td { padding: 10px; border-bottom: 1px solid #ccc; }
-th { background: #2c3e50; color: white; }
-select, input[type="date"], input[type="text"], textarea { width: 100%; padding: 6px; box-sizing: border-box; margin-bottom: 10px; }
-button { padding: 6px 12px; background: #2980b9; color: white; border: none; border-radius: 4px; cursor: pointer; }
-button:hover { background-color: #1f6391; }
-.completed { background-color: #d4edda !important; }
-.menu { margin-bottom: 20px; }
-.menu button { margin-right: 10px; }
-img.preview { width: 100px; height: auto; margin-top: 5px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breakdown Reporting</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f4f9ff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    h2::before {
+      content: "🛠️";
+      margin-right: 8px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .dashboard-btn {
+      display: inline-block;
+      background-color: #1e90ff;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .dashboard-btn::before {
+      content: "🏠 ";
+    }
+  </style>
 </head>
-<body><div class="menu">
-<button onclick="window.location.href='index.html'">🏠 Dashboard</button>
-</div><h2>🔧 Breakdown Reporting</h2><form id="breakdownForm">
-<label>Date: <input type="date" id="dateInput" required></label><br>
-<label>Reported By:
-<select id="reportedBy">
-<option>Mahantesh B</option><option>Ashok Patil</option><option>Gurunath Talawar</option>
-<option>Sudhir Khot</option><option>Sunil K</option>
-</select>
-</label><br>
-<label>Reported To:
-<select id="reportedTo">
-<option>CPM sir</option><option>Pankaj Saini</option><option>Avinash Gaikwad</option>
-<option>Nilesh Gawade</option><option>Praveen Kumar</option><option>Prajapati</option><option>Mantu</option><option>Seva</option>
-</select>
-</label><br>
-<label>Description:<br><textarea id="description" rows="4" required></textarea></label><br>
-<label>Status:
-<select id="status">
-<option>Pending</option><option>In Progress</option><option>Completed</option>
-</select>
-</label><br>
-<label>Upload Image: <input type="file" id="imageUpload" accept="image/*"></label><br>
-<img id="imagePreview" class="preview" style="display:none;">
-<button type="submit">Update</button>
-</form><h3>🔍 Search Breakdown Reports</h3>
-<label>From: <input type="date" id="fromDate"></label>
-<label>To: <input type="date" id="toDate"></label>
-<button onclick="searchReports()">Search</button>
-<button onclick="downloadPDF()">📄 Download PDF</button>
-<div id="reportResult"></div><script>
-let breakdowns = JSON.parse(localStorage.getItem("breakdownLog") || "[]");
+<body>
 
-document.getElementById("breakdownForm").onsubmit = function(event) {
-event.preventDefault();
-const date = document.getElementById("dateInput").value;
-const reportedBy = document.getElementById("reportedBy").value;
-const reportedTo = document.getElementById("reportedTo").value;
-const description = document.getElementById("description").value;
-const status = document.getElementById("status").value;
-const image = document.getElementById("imagePreview").src || "";
-const timestamp = new Date().toLocaleString();
+  <a class="dashboard-btn" href="#" onclick="goToDashboard()">Dashboard</a>
 
-const existingIndex = breakdowns.findIndex(b => b.date === date && b.description === description);
+  <h2>Breakdown Reporting</h2>
 
-if (existingIndex >= 0 && breakdowns[existingIndex].status === "Completed") {
-alert("✅ This breakdown is already marked Completed. Updates are locked.");
-return;
-}
+  <label for="date">Date:</label>
+  <input type="date" id="date" name="date">
 
-const entry = { date, reportedBy, reportedTo, description, status, image, timestamp };
-if (existingIndex >= 0) breakdowns[existingIndex] = entry;
-else breakdowns.push(entry);
+  <label for="reportedBy">Reported By:</label>
+  <select id="reportedBy">
+    <option>Ashok Patil</option>
+    <option>Gurunath Talawar</option>
+    <option>Sudhir Khot</option>
+    <option>Sunil Khade</option>
+  </select>
 
-localStorage.setItem("breakdownLog", JSON.stringify(breakdowns));
-alert("✅ Breakdown saved successfully.");
-this.reset();
-document.getElementById("imagePreview").style.display = "none";
-};
+  <label for="reportedTo">Reported To:</label>
+  <input type="text" id="reportedTo" placeholder="Enter name">
 
-document.getElementById("imageUpload").onchange = function(e) {
-const reader = new FileReader();
-reader.onload = function(evt) {
-const img = document.getElementById("imagePreview");
-img.src = evt.target.result;
-img.style.display = "block";
-};
-reader.readAsDataURL(e.target.files[0]);
-};
+  <label for="description">Description:</label>
+  <textarea id="description" rows="4" placeholder="Enter breakdown details..."></textarea>
 
-function searchReports() {
-const from = new Date(document.getElementById("fromDate").value);
-const to = new Date(document.getElementById("toDate").value);
-const results = breakdowns.filter(r => {
-const d = new Date(r.date);
-return d >= from && d <= to;
-});
+  <label for="status">Status:</label>
+  <select id="status">
+    <option>Pending</option>
+    <option>In Progress</option>
+    <option>Completed</option>
+  </select>
 
-let html = `<h4>Breakdown Report</h4><table><tr><th>Date</th><th>By</th><th>To</th><th>Description</th><th>Status</th><th>Image</th><th>Timestamp</th></tr>`;
-results.forEach(r => {
-html += `<tr><td>${r.date}</td><td>${r.reportedBy}</td><td>${r.reportedTo}</td><td>${r.description}</td><td>${r.status}</td><td>${r.image ? '<img src="'+r.image+'" class="preview">' : ''}</td><td>${r.timestamp}</td></tr>`;
-});
-html += `</table>`;
-document.getElementById("reportResult").innerHTML = html;
-}
+  <label for="image">Upload Image:</label>
+  <input type="file" id="image">
 
-function downloadPDF() {
-const printWindow = window.open('', '', 'width=800,height=600');
-printWindow.document.write(`
-<html><head><title>Breakdown Report</title>
-<style>
-body { font-family: Arial; padding: 20px; }
-h2 { text-align: center; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { padding: 8px; border: 1px solid #ccc; }
-th { background: #444; color: white; }
-img { width: 100px; }
-</style></head><body><h2>Indian Oil Corporation Limited<br>Indane Bottling Plant, Belgaum BP<br>Team NS ENGINEERS</h2>
-${document.getElementById("reportResult").innerHTML}
-</body></html>
-`);
-printWindow.document.close();
-printWindow.focus();
-printWindow.print();
+  <button onclick="saveBreakdown()">Update</button>
 
-} </script>
+  <script>
+    function goToDashboard() {
+      // Communicate back to index.html to change iframe source if needed
+      if (window.top !== window.self) {
+        window.top.document.getElementById('contentFrame').src = 'welcome.html';
+      }
+    }
 
+    function saveBreakdown() {
+      alert("Breakdown report saved locally.");
+      // You can implement localStorage or other methods here.
+    }
+  </script>
 </body>
 </html>
