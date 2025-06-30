@@ -1,0 +1,123 @@
+<!DOCTYPE html><html>
+<head>
+<meta charset="UTF-8">
+<title>Maintenance Dashboard</title>
+<style>
+body { font-family: Arial, sans-serif; background: #eaf3fb; margin: 0; padding: 10px; overflow-x: hidden; }
+h2, h3 { text-align: center; color: #1a1a1a; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #fff; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+th { background: #dbeeff; font-weight: bold; }
+select, input[type="date"] { padding: 6px; width: 100%; border-radius: 4px; border: 1px solid #ccc; }
+button { padding: 8px 16px; border: none; border-radius: 4px; margin-top: 5px; cursor: pointer; }
+.update-btn { background-color: #555; color: #fff; }
+.search-btn { background-color: #007bff; color: #fff; width: 100%; }
+.pdf-btn, .img-btn { width: 100%; background-color: #f8f9fa; border: 1px solid #ccc; }
+.status-tag { padding: 4px 8px; border-radius: 4px; color: #fff; font-weight: bold; display: inline-block; }
+.Pending { background-color: #e74c3c; }
+.InProgress { background-color: #f1c40f; color: #000; }
+.Completed { background-color: #2ecc71; }
+.panel { background: #fff9db; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+.footer { position: relative; bottom: 0; left: 0; right: 0; padding: 10px; }
+#reportResult table th { background: #dbeeff; }
+</style>
+</head>
+<body><h2>⚒️ Weekly Maintenance Schedule</h2>
+<table>
+<thead>
+<tr><th>Day</th><th>Task</th><th>Assigned To</th><th>Status</th><th>Action</th></tr>
+</thead>
+<tbody id="weeklyTasks">
+<tr><td>Mon</td><td>Battery specific gravity</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Tue</td><td>Weekly CP reading</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Wed</td><td>Vibration monitoring</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Thu</td><td>TLD ROV interlock check</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Sat</td><td>Fire hydrant flushing</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+</tbody>
+</table><h2>📅 Monthly Activity Checklist</h2>
+<table>
+<thead>
+<tr><th>Item</th><th>Action</th><th>Assigned To</th><th>Status</th><th>Action</th></tr>
+</thead>
+<tbody id="monthlyTasks">
+<tr><td>110V Battery Bank</td><td>Specific gravity checking</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>CCTV Battery Bank</td><td>Specific gravity checking</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>10 KVA UPS</td><td>Battery checking</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>6 KVA UPS</td><td>Battery checking</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>10 KVA Microtek UPS</td><td>Battery checking</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>ELCB</td><td>Tripping test</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Safety Trip</td><td>Monthly testing</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Capacitor Bank</td><td>Current monitoring</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Borewell</td><td>Reading</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>AC Units</td><td>Filter cleaning</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>Fire Hydrant</td><td>Pressure low simulation</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>HLA</td><td>Testing</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+<tr><td>ETB/MCP</td><td>Testing</td><td><select class="assignedTo"></select></td><td><select class="status"></select></td><td><button class="update-btn" onclick="updateRow(this)">Update</button></td></tr>
+</tbody>
+</table><h3>🔍 Search Report & Download</h3>
+<div class="panel footer">
+<label>From: <input type="date" id="fromDate"></label><br><br>
+<label>To: <input type="date" id="toDate"></label><br><br>
+<button class="search-btn" onclick="searchLog()">🔍 Search Report</button><br><br>
+<button class="pdf-btn" onclick="downloadPDF()">📄 Download PDF</button><br><br>
+<button class="img-btn" onclick="downloadImage()">🌟 Download Image</button>
+</div><div id="reportResult"></div><script>
+const assignedNames = ["Ashok Patil", "Gurunath Talawar", "Sudhir Khot", "Sunil Khade"];
+const statuses = ["Pending", "In Progress", "Completed"];
+let maintenanceLog = JSON.parse(localStorage.getItem('maintenanceLog') || '[]');
+
+window.onload = () => {
+document.querySelectorAll(".assignedTo").forEach(sel => assignedNames.forEach(name => sel.innerHTML += `<option>${name}</option>`));
+document.querySelectorAll(".status").forEach(sel => statuses.forEach(st => sel.innerHTML += `<option>${st}</option>`));
+};
+
+function updateRow(btn) {
+const row = btn.closest("tr");
+const task = row.cells[1].innerText;
+const assignedTo = row.querySelector(".assignedTo").value;
+const status = row.querySelector(".status").value;
+const now = new Date();
+const date = now.toISOString().split('T')[0];
+const time = now.toLocaleTimeString();
+const section = row.closest('tbody').id === 'weeklyTasks' ? 'Weekly' : 'Monthly';
+maintenanceLog.push({ section, date, time, task, assignedTo, status });
+localStorage.setItem('maintenanceLog', JSON.stringify(maintenanceLog));
+alert("Task Updated");
+}
+
+function searchLog() {
+const from = new Date(document.getElementById("fromDate").value);
+const to = new Date(document.getElementById("toDate").value);
+const results = maintenanceLog.filter(entry => {
+const d = new Date(entry.date);
+return d >= from && d <= to;
+});
+let html = `
+<h3>Maintenance Log Results</h3>
+<div style="text-align:center;font-weight:bold">
+Indian Oil Corporation Limited<br>Indane Bottling Plant, Belgaum BP<br>Team NS ENGINEERS
+</div>
+<table><tr><th>Date</th><th>Time</th><th>Section</th><th>Task</th><th>Assigned</th><th>Status</th></tr>`;
+results.forEach(r => {
+html += `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.section}</td><td>${r.task}</td><td>${r.assignedTo}</td><td>${r.status}</td></tr>`;
+});
+html += `</table><br><p><strong>Signature:</strong> ____________________________</p>`;
+document.getElementById("reportResult").innerHTML = html;
+}
+
+function downloadPDF() {
+const w = window.open('', '', 'width=800,height=1100');
+w.document.write(`<html><head><title>PDF</title>
+<style>@page { size: A4; margin: 20mm; } body{ font-family: Arial; padding:20px; }
+table { border-collapse: collapse; width:100%; margin-top:20px; }
+th, td { border: 1px solid #000; padding: 6px; }
+th { background:#eee; }
+</style></head><body>${document.getElementById("reportResult").innerHTML}
+</body></html>`);
+
+w.document.close(); w.print(); }
+
+function downloadImage() { const el = document.getElementById("reportResult"); html2canvas(el).then(canvas => { const link = document.createElement('a'); link.download = 'Maintenance_Report.png'; link.href = canvas.toDataURL(); link.click(); }); } </script>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script></body>
+</html>
