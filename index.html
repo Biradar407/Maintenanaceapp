@@ -1,171 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#4b0082" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&family=Playfair+Display:wght@700&display=swap">
   <title>Maintenance Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    * {
+    body {
       margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to right, #f8f9fa, #e0eafc);
-      overflow: hidden;
-    }
+      background: url('tool.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }header {
+  background: linear-gradient(135deg, #4b0082, #800080);
+  color: white;
+  text-align: center;
+  padding: 20px 10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
 
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(135deg, #4b0082, #800080);
-      color: #fff;
-      padding: 15px 20px;
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      z-index: 1000;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      text-shadow: 1px 1px 2px #00000088;
-    }
+.action-bar {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+}
 
-    .container {
-      display: flex;
-      height: calc(100% - 70px);
-      margin-top: 70px;
-    }
+.action-bar span {
+  margin-left: 10px;
+  font-size: 16px;
+}
 
-    .sidebar {
-      width: 220px;
-      background: #1e3a8a;
-      color: white;
-      padding-top: 20px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 3px 0 6px rgba(0, 0, 0, 0.3);
-      overflow-y: auto;
-    }
+.activity-menu {
+  display: none;
+  background-color: #f9f9f9;
+  padding: 10px 16px;
+  border-bottom: 2px solid #ddd;
+}
 
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 20px;
-      font-family: 'Playfair Display', serif;
-      color: #ffd4aa;
-      text-shadow: 1px 1px 2px #000;
-    }
+.activity-menu button {
+  display: block;
+  width: 100%;
+  background-color: #1e3a8a;
+  color: white;
+  padding: 10px;
+  margin: 6px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-    .sidebar button {
-      background: none;
-      color: white;
-      border: none;
-      text-align: left;
-      padding: 14px 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 15px;
-    }
+.activity-menu button:hover {
+  background-color: #2c4db0;
+}
 
-    .sidebar button:hover {
-      background: #2d4eb5;
-      padding-left: 32px;
-      font-weight: bold;
-    }
+.status-cards {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-    .main {
-      flex-grow: 1;
-      overflow: hidden;
-      background: #ffffff;
-    }
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  padding: 18px 20px;
+  border-left: 8px solid;
+}
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+.pending {
+  border-color: red;
+}
 
-    @media screen and (max-width: 600px) {
-      header {
-        font-size: 18px;
-        padding: 12px 10px;
-      }
+.in-progress {
+  border-color: orange;
+}
 
-      .sidebar {
-        width: 180px;
-      }
+.completed {
+  border-color: green;
+}
 
-      .sidebar button {
-        font-size: 14px;
-        padding: 12px 18px;
-      }
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
 
-      .container {
-        flex-direction: column;
-      }
+.card p {
+  margin: 0;
+  font-size: 15px;
+  color: #555;
+}
 
-      .sidebar {
-        height: 150px;
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-      }
+@media (max-width: 600px) {
+  .status-cards {
+    padding: 10px;
+  }
 
-      .sidebar h2 {
-        display: none;
-      }
+  .card h3 {
+    font-size: 16px;
+  }
 
-      .sidebar button {
-        white-space: nowrap;
-        flex: 1;
-      }
-    }
+  .card p {
+    font-size: 14px;
+  }
+
+  .activity-menu button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
   </style>
 </head>
-<body>
-
-  <header>
+<body>  <header>
     Indane Bottling Plant, Belgaum BP — Team NS Engineers
-  </header>
-
-  <div class="container">
-    <div class="sidebar">
-      <h2>Activities</h2>
-      <button onclick="loadPage('breakdown.html')">Breakdown Reporting</button>
-      <button onclick="loadPage('Weekly Activity.html')">Weekly Activity</button>
-      <button onclick="loadPage('Monthly Activity.html')">Monthly Activity</button>
-      <button onclick="loadPage('Quarterly Activity.html')">Quarterly Activity</button>
-      <button onclick="loadPage('Half Yearly.html')">Half Yearly</button>
-      <button onclick="loadPage('Yearly.html')">Yearly</button>
-      <button onclick="loadPage('Assign Task.html')">Assign Task</button>
-      <button onclick="loadPage('Spares Availability.html')">Spares Availability</button>
-      <button onclick="loadPage('Procure Spares.html')">Procure Spares</button>
+  </header>  <div class="action-bar" onclick="toggleMenu()">
+    ☰ <span>Activity Menu</span>
+  </div>  <div class="activity-menu" id="activityMenu">
+    <button onclick="openActivity('Breakdown Reporting')">Breakdown Reporting</button>
+    <button onclick="openActivity('Weekly Activity')">Weekly Activity</button>
+    <button onclick="openActivity('Monthly Activity')">Monthly Activity</button>
+    <button onclick="openActivity('Quarterly Activity')">Quarterly Activity</button>
+    <button onclick="openActivity('Half Yearly')">Half Yearly</button>
+    <button onclick="openActivity('Yearly')">Yearly</button>
+    <button onclick="openActivity('Assign Task')">Assign Task</button>
+    <button onclick="openActivity('Spares Availability')">Spares Availability</button>
+    <button onclick="openActivity('Procure Spares')">Procure Spares</button>
+  </div>  <div class="status-cards" id="statusCards">
+    <div class="card pending">
+      <h3>Pending Tasks</h3>
+      <p>6 activities have pending items. Please follow up urgently.</p>
     </div>
-
-    <div class="main">
-      <iframe id="contentFrame" src="welcome.html"></iframe>
+    <div class="card in-progress">
+      <h3>In Progress</h3>
+      <p>4 tasks are actively being worked on this week.</p>
     </div>
-  </div>
+    <div class="card completed">
+      <h3>Completed</h3>
+      <p>9 tasks were successfully completed and logged.</p>
+    </div>
+  </div>  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('activityMenu');
+      const cards = document.getElementById('statusCards');
+      const isOpen = menu.style.display === 'block';
 
-  <script>
-    function loadPage(page) {
-      document.getElementById("contentFrame").src = page;
+      menu.style.display = isOpen ? 'none' : 'block';
+      cards.style.display = isOpen ? 'block' : 'none';
     }
 
-    // Register service worker if available
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('✅ Service Worker registered'))
-        .catch(err => console.warn('Service Worker registration failed:', err));
+    function openActivity(activityName) {
+      alert('Opening: ' + activityName);
+      // Logic to load real activity page here.
     }
-  </script>
-</body>
+  </script></body>
 </html>
