@@ -148,22 +148,14 @@
     }
   </style>
 </head>
-<body>
+<body onload="init()">
 
 <header>Weekly Preventive Maintenance Activity</header>
 
-<!-- Main Panel -->
 <div class="panel" id="mainPanel">
   <h2>🛠️ Assign Weekly Activity</h2>
   <select id="activity">
     <option value="">Select Activity</option>
-    <option value="CP System(Weekly)">CP System(Weekly)</option>
-    <option value="Battery Sp.Gravity">Battery Sp.Gravity</option>
-    <option value="Vibration Monitoring">Vibration Monitoring</option>
-    <option value="TLD Earthing Relay">TLD Earthing Relay</option>
-    <option value="Motor Body Earthing and Glanding">Motor Body Earthing and Glanding</option>
-    <option value="Panel Cleaning">Panel Cleaning</option>
-    <option value="Solar Panel Cleaning">Solar Panel Cleaning</option>
   </select>
   <select id="assignedTo" multiple>
     <option value="Ashok Patil">Ashok Patil</option>
@@ -192,7 +184,6 @@
   </div>
 </div>
 
-<!-- Add Activity Panel -->
 <div class="panel hidden" id="addPanel">
   <h2>➕ Add New Activity</h2>
   <input type="text" id="newActivity" placeholder="Enter Activity Name" />
@@ -211,7 +202,6 @@
   <button class="btn-secondary" onclick="toggleAddPanel(false)">⬅️ Back</button>
 </div>
 
-<!-- Report Panel -->
 <div class="panel hidden" id="reportPanel">
   <h2>📋 Activity Status Report</h2>
   <div class="table-wrapper">
@@ -234,77 +224,73 @@
 </div>
 
 <script>
-let activities = [
-  { name: 'CP System(Weekly)', day: 'Tuesday' },
-  { name: 'Battery Sp.Gravity', day: 'Monday' },
-  { name: 'Vibration Monitoring', day: 'Saturday' },
-  { name: 'TLD Earthing Relay', day: 'Wednesday' },
-  { name: 'Motor Body Earthing and Glanding', day: 'Sunday' },
-  { name: 'Panel Cleaning', day: 'Saturday' },
-  { name: 'Solar Panel Cleaning', day: 'Sunday' }
-];
-
+let activities = [];
 let assigned = [];
 
-function renderTable() {
-  const tbody = document.querySelector("#activityTable tbody");
-  const sorted = [...assigned].sort((a, b) => {
-    const order = { "Completed": 0, "In Progress": 1, "Pending": 2 };
-    return order[a.status] - order[b.status];
+function init() {
+  activities = JSON.parse(localStorage.getItem("weeklyActivities")) || [
+    { name: 'CP System(Weekly)', day: 'Tuesday' },
+    { name: 'Battery Sp.Gravity', day: 'Monday' },
+    { name: 'Vibration Monitoring', day: 'Saturday' },
+    { name: 'TLD Earthing Relay', day: 'Wednesday' },
+    { name: 'Motor Body Earthing and Glanding', day: 'Sunday' },
+    { name: 'Panel Cleaning', day: 'Saturday' },
+    { name: 'Solar Panel Cleaning', day: 'Sunday' }
+  ];
+  assigned = JSON.parse(localStorage.getItem("weeklyAssigned")) || [];
+  renderActivityDropdown();
+  renderTable();
+}
+
+function saveToLocal() {
+  localStorage.setItem("weeklyActivities", JSON.stringify(activities));
+  localStorage.setItem("weeklyAssigned", JSON.stringify(assigned));
+}
+
+function renderActivityDropdown() {
+  const select = document.getElementById("activity");
+  select.innerHTML = `<option value="">Select Activity</option>`;
+  activities.forEach(act => {
+    const option = document.createElement("option");
+    option.text = act.name;
+    option.value = act.name;
+    select.add(option);
   });
-  tbody.innerHTML = sorted.map((a, i) => `
-    <tr>
-      <td>${a.name}</td>
-      <td>${a.day}</td>
-      <td>${a.assignedTo}</td>
-      <td>
-        <select onchange="updateStatus(this.value, ${i})">
-          <option value="Pending" ${a.status === 'Pending' ? 'selected' : ''}>Pending</option>
-          <option value="In Progress" ${a.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-          <option value="Completed" ${a.status === 'Completed' ? 'selected' : ''}>Completed</option>
-        </select>
-        <div class="timestamp">${a.timestamp || ''}</div>
-      </td>
-      <td><button onclick="saveStatus(${i})">💾</button></td>
-      <td><button onclick="removeActivity(${i})">🗑️</button></td>
-    </tr>
-  `).join("");
 }
 
 function assignActivity() {
   const name = document.getElementById("activity").value;
   const assignedToList = Array.from(document.getElementById("assignedTo").selectedOptions).map(opt => opt.value);
-  const assignedTo = assignedToList.join(", ");
+  if (!name || assignedToList.length === 0) return alert("Select activity and assignees");
   const activity = activities.find(a => a.name === name);
-  if (!activity || assignedToList.length === 0) return alert("Select activity and assignees");
-  assigned.push({ ...activity, assignedTo, status: "Pending", timestamp: "" });
+  assigned.push({ ...activity, assignedTo: assignedToList.join(", "), status: "Pending", timestamp: "" });
+  saveToLocal();
   renderTable();
 }
 
 function saveActivity() {
-  const name = document.getElementById("newActivity").value;
+  const name = document.getElementById("newActivity").value.trim();
   const day = document.getElementById("dayPicker").value;
   if (!name || !day) return alert("Enter activity and select day");
   activities.push({ name, day });
-  const select = document.getElementById("activity");
-  const option = document.createElement("option");
-  option.text = name;
-  option.value = name;
-  select.add(option);
+  saveToLocal();
+  renderActivityDropdown();
   toggleAddPanel(false);
 }
 
-function updateStatus(newStatus, index) {
-  assigned[index].status = newStatus;
+function updateStatus(status, index) {
+  assigned[index].status = status;
 }
 
 function saveStatus(index) {
   assigned[index].timestamp = new Date().toLocaleString();
+  saveToLocal();
   renderTable();
 }
 
 function removeActivity(index) {
   assigned.splice(index, 1);
+  saveToLocal();
   renderTable();
 }
 
@@ -323,26 +309,17 @@ function showReportPanel() {
   const allActivityNames = activities.map(a => a.name);
   const reportRows = allActivityNames.map(name => {
     const assignedEntry = assigned.find(a => a.name === name);
-    if (assignedEntry) {
-      return {
-        name: assignedEntry.name,
-        day: assignedEntry.day,
-        assignedTo: assignedEntry.assignedTo,
-        status: assignedEntry.status,
-        timestamp: assignedEntry.timestamp || '',
-      };
-    } else {
-      const act = activities.find(a => a.name === name);
-      return {
-        name,
-        day: act.day,
-        assignedTo: "—",
-        status: "Not Assigned",
-        timestamp: "",
-      };
-    }
+    const activity = activities.find(a => a.name === name);
+    return assignedEntry ? {
+      ...assignedEntry
+    } : {
+      name,
+      day: activity.day,
+      assignedTo: "—",
+      status: "Not Assigned",
+      timestamp: ""
+    };
   });
-
   tbody.innerHTML = reportRows.map(row => `
     <tr class="status-${row.status.toLowerCase().replace(/\s/g, '')}">
       <td>${row.name}</td>
