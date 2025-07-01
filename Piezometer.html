@@ -9,11 +9,8 @@
     body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
-      background: #e0f7fa;
-      background-image: url('earth.jpg');
-      background-repeat: no-repeat;
+      background: #e0f7fa url('earth.jpg') no-repeat center center fixed;
       background-size: cover;
-      background-attachment: fixed;
       color: #1b3e2b;
     }
 
@@ -28,7 +25,8 @@
     }
 
     .panel {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.92) url('earth.jpg') no-repeat center center;
+      background-size: cover;
       margin: 20px auto;
       padding: 20px;
       max-width: 1000px;
@@ -106,6 +104,10 @@
       border-radius: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
+    .search-footer.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -115,11 +117,12 @@
 </header>
 
 <div class="panel" id="mainPanel">
-  <h2>📅 Add Piezometer Reading</h2>
+  <h2>🗓️ Add Piezometer Reading</h2>
   <input type="date" id="readingDate" />
   <input type="number" id="opening" placeholder="Opening Reading (ft)" />
   <input type="number" id="closing" placeholder="Closing Reading (ft)" />
   <button onclick="addReading()">➕ Add Reading</button>
+  <button onclick="showSearchPanel()">🔍 Search Report</button>
   <table id="readingTable">
     <thead>
       <tr>
@@ -134,15 +137,15 @@
   </table>
 </div>
 
-<div class="search-footer">
-  <h2>🔍 Search Reading</h2>
-  <label>From: <input type="date" id="fromDate" /></label>
-  <label>To: <input type="date" id="toDate" /></label>
-  <button onclick="searchReadings()">🔎 Search</button>
-</div>
-
 <div class="panel hidden" id="searchPanel">
   <h2 id="reportHeader"></h2>
+
+  <div class="search-footer">
+    <label>From: <input type="date" id="fromDate" /></label>
+    <label>To: <input type="date" id="toDate" /></label>
+    <button onclick="searchReadings()">🔎 Search</button>
+  </div>
+
   <table id="searchTable">
     <thead>
       <tr>
@@ -156,7 +159,7 @@
     <tbody></tbody>
   </table>
   <button onclick="generatePDF()">📄 Generate PDF</button>
-  <button onclick="shareImage()">🖼️ Share Image</button>
+  <button onclick="shareImageReport()">🖼️ Share Image</button>
   <button class="btn-secondary" onclick="backToMain()">⬅️ Back</button>
 </div>
 
@@ -219,6 +222,11 @@ function deleteReading(index) {
   render();
 }
 
+function showSearchPanel() {
+  document.getElementById("mainPanel").classList.add("hidden");
+  document.getElementById("searchPanel").classList.remove("hidden");
+}
+
 function searchReadings() {
   const from = document.getElementById("fromDate").value;
   const to = document.getElementById("toDate").value;
@@ -231,7 +239,7 @@ function searchReadings() {
   const now = new Date().toLocaleString();
   header.innerHTML = `🌍 Indane Bottling Plant, Belgaum BP — Piezometer Reading: <b>${monthYear}</b><br>Report Generated: ${now}`;
 
-  tbody.innerHTML = result.map((r, i) => `
+  tbody.innerHTML = result.map(r => `
     <tr>
       <td>${r.date}</td>
       <td>${r.open}</td>
@@ -239,16 +247,13 @@ function searchReadings() {
       <td>${r.wl}</td>
       <td><button onclick="deleteSearched('${r.date}')">🗑️ Delete</button></td>
     </tr>`).join("");
-
-  document.getElementById("mainPanel").classList.add("hidden");
-  document.getElementById("searchPanel").classList.remove("hidden");
 }
 
 function deleteSearched(date) {
   readings = readings.filter(r => r.date !== date);
   save();
-  backToMain();
   render();
+  searchReadings();
 }
 
 function backToMain() {
@@ -260,12 +265,25 @@ function generatePDF() {
   window.print();
 }
 
-function shareImage() {
-  alert("Image sharing depends on browser/device support.");
+function shareImageReport() {
+  const panel = document.getElementById("searchPanel");
+  html2canvas(panel).then(canvas => {
+    canvas.toBlob(blob => {
+      const file = new File([blob], "Piezometer_Report.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: "Piezometer Report" });
+      } else {
+        const link = document.createElement("a");
+        link.download = "Piezometer_Report.png";
+        link.href = URL.createObjectURL(blob);
+        link.click();
+      }
+    });
+  });
 }
 
 render();
 </script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
