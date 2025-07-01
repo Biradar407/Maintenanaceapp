@@ -17,7 +17,6 @@
       font-size: 16px;
       overflow: hidden;
     }
-
     header {
       background: linear-gradient(to right, #004d40, #00bfa5);
       color: white;
@@ -29,7 +28,6 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
       flex-shrink: 0;
     }
-
     .panel {
       background: url('preventive.jpg') no-repeat center center;
       background-size: cover;
@@ -46,13 +44,11 @@
       display: flex;
       flex-direction: column;
     }
-
     h2 {
       margin-top: 0;
       color: #00796b;
       font-size: 20px;
     }
-
     select, input, button {
       padding: 12px;
       margin: 8px 12px 8px 0;
@@ -61,16 +57,11 @@
       border: 1px solid #bbb;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     }
-
-    select[multiple] {
-      height: 90px;
-    }
-
+    select[multiple] { height: 90px; }
     input::placeholder {
       font-size: 16px;
       font-style: italic;
     }
-
     button {
       background: linear-gradient(to right, #00c853, #00e676);
       color: white;
@@ -78,73 +69,52 @@
       font-weight: bold;
       box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     }
-
     button:hover {
       background: linear-gradient(to right, #009624, #00c853);
       cursor: pointer;
     }
-
     .btn-secondary {
       background: linear-gradient(to right, #607d8b, #90a4ae);
     }
-
     .btn-secondary:hover {
       background: linear-gradient(to right, #455a64, #607d8b);
     }
-
     .table-wrapper {
       flex: 1;
       overflow-y: auto;
       margin-top: 20px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       min-width: 600px;
     }
-
     th, td {
       padding: 12px;
       border: 1px solid #ccc;
       text-align: center;
     }
-
     th {
       background: #b2dfdb;
       font-weight: bold;
       color: #004d40;
     }
-
     .timestamp {
       font-size: 13px;
       color: #555;
       margin-top: 4px;
     }
-
     .hidden {
       display: none;
     }
-
     .status-pending { background-color: #ffebee; color: #c62828; font-weight: bold; }
     .status-inprogress { background-color: #fff9c4; color: #f9a825; font-weight: bold; }
     .status-completed { background-color: #e8f5e9; color: #2e7d32; font-weight: bold; }
     .status-notassigned { background-color: #eceff1; color: #607d8b; font-weight: bold; }
-
     @media (max-width: 768px) {
-      th, td {
-        font-size: 13px;
-        padding: 8px;
-      }
-
-      button, select, input {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .table-wrapper {
-        max-height: 300px;
-      }
+      th, td { font-size: 13px; padding: 8px; }
+      button, select, input { width: 100%; margin-bottom: 10px; }
+      .table-wrapper { max-height: 300px; }
     }
   </style>
 </head>
@@ -152,6 +122,7 @@
 
 <header>Weekly Preventive Maintenance Activity</header>
 
+<!-- Main Panel -->
 <div class="panel" id="mainPanel">
   <h2>🛠️ Assign Weekly Activity</h2>
   <select id="activity">
@@ -184,6 +155,7 @@
   </div>
 </div>
 
+<!-- Add Activity Panel -->
 <div class="panel hidden" id="addPanel">
   <h2>➕ Add New Activity</h2>
   <input type="text" id="newActivity" placeholder="Enter Activity Name" />
@@ -202,6 +174,7 @@
   <button class="btn-secondary" onclick="toggleAddPanel(false)">⬅️ Back</button>
 </div>
 
+<!-- Report Panel -->
 <div class="panel hidden" id="reportPanel">
   <h2>📋 Activity Status Report</h2>
   <div class="table-wrapper">
@@ -228,16 +201,25 @@ let activities = [];
 let assigned = [];
 
 function init() {
-  activities = JSON.parse(localStorage.getItem("weeklyActivities")) || [
-    { name: 'CP System(Weekly)', day: 'Tuesday' },
-    { name: 'Battery Sp.Gravity', day: 'Monday' },
-    { name: 'Vibration Monitoring', day: 'Saturday' },
-    { name: 'TLD Earthing Relay', day: 'Wednesday' },
-    { name: 'Motor Body Earthing and Glanding', day: 'Sunday' },
-    { name: 'Panel Cleaning', day: 'Saturday' },
-    { name: 'Solar Panel Cleaning', day: 'Sunday' }
-  ];
-  assigned = JSON.parse(localStorage.getItem("weeklyAssigned")) || [];
+  const storedActivities = JSON.parse(localStorage.getItem("weeklyActivities"));
+  const storedAssigned = JSON.parse(localStorage.getItem("weeklyAssigned"));
+
+  if (!storedActivities) {
+    activities = [
+      { name: 'CP System(Weekly)', day: 'Tuesday' },
+      { name: 'Battery Sp.Gravity', day: 'Monday' },
+      { name: 'Vibration Monitoring', day: 'Saturday' },
+      { name: 'TLD Earthing Relay', day: 'Wednesday' },
+      { name: 'Motor Body Earthing and Glanding', day: 'Sunday' },
+      { name: 'Panel Cleaning', day: 'Saturday' },
+      { name: 'Solar Panel Cleaning', day: 'Sunday' }
+    ];
+    localStorage.setItem("weeklyActivities", JSON.stringify(activities));
+  } else {
+    activities = storedActivities;
+  }
+
+  assigned = storedAssigned || [];
   renderActivityDropdown();
   renderTable();
 }
@@ -250,10 +232,10 @@ function saveToLocal() {
 function renderActivityDropdown() {
   const select = document.getElementById("activity");
   select.innerHTML = `<option value="">Select Activity</option>`;
-  activities.forEach(act => {
+  activities.forEach(a => {
     const option = document.createElement("option");
-    option.text = act.name;
-    option.value = act.name;
+    option.value = a.name;
+    option.text = a.name;
     select.add(option);
   });
 }
@@ -262,20 +244,42 @@ function assignActivity() {
   const name = document.getElementById("activity").value;
   const assignedToList = Array.from(document.getElementById("assignedTo").selectedOptions).map(opt => opt.value);
   if (!name || assignedToList.length === 0) return alert("Select activity and assignees");
+
   const activity = activities.find(a => a.name === name);
-  assigned.push({ ...activity, assignedTo: assignedToList.join(", "), status: "Pending", timestamp: "" });
+  assigned.push({
+    name,
+    day: activity.day,
+    assignedTo: assignedToList.join(", "),
+    status: "Pending",
+    timestamp: ""
+  });
   saveToLocal();
   renderTable();
 }
 
-function saveActivity() {
-  const name = document.getElementById("newActivity").value.trim();
-  const day = document.getElementById("dayPicker").value;
-  if (!name || !day) return alert("Enter activity and select day");
-  activities.push({ name, day });
-  saveToLocal();
-  renderActivityDropdown();
-  toggleAddPanel(false);
+function renderTable() {
+  const tbody = document.querySelector("#activityTable tbody");
+  const sorted = [...assigned].sort((a, b) => {
+    const order = { "Completed": 0, "In Progress": 1, "Pending": 2 };
+    return order[a.status] - order[b.status];
+  });
+  tbody.innerHTML = sorted.map((a, i) => `
+    <tr>
+      <td>${a.name}</td>
+      <td>${a.day}</td>
+      <td>${a.assignedTo}</td>
+      <td>
+        <select onchange="updateStatus(this.value, ${i})">
+          <option value="Pending" ${a.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option value="In Progress" ${a.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+          <option value="Completed" ${a.status === 'Completed' ? 'selected' : ''}>Completed</option>
+        </select>
+        <div class="timestamp">${a.timestamp || ''}</div>
+      </td>
+      <td><button onclick="saveStatus(${i})">💾</button></td>
+      <td><button onclick="removeActivity(${i})">🗑️</button></td>
+    </tr>
+  `).join("");
 }
 
 function updateStatus(status, index) {
@@ -294,6 +298,18 @@ function removeActivity(index) {
   renderTable();
 }
 
+function saveActivity() {
+  const name = document.getElementById("newActivity").value.trim();
+  const day = document.getElementById("dayPicker").value;
+  if (!name || !day) return alert("Enter activity and select day");
+
+  if (activities.find(a => a.name === name)) return alert("Activity already exists.");
+  activities.push({ name, day });
+  saveToLocal();
+  renderActivityDropdown();
+  toggleAddPanel(false);
+}
+
 function toggleAddPanel(show) {
   document.getElementById("mainPanel").classList.toggle("hidden", show);
   document.getElementById("addPanel").classList.toggle("hidden", !show);
@@ -306,19 +322,11 @@ function toggleReportPanel(show) {
 
 function showReportPanel() {
   const tbody = document.querySelector("#reportTable tbody");
-  const allActivityNames = activities.map(a => a.name);
-  const reportRows = allActivityNames.map(name => {
-    const assignedEntry = assigned.find(a => a.name === name);
-    const activity = activities.find(a => a.name === name);
-    return assignedEntry ? {
-      ...assignedEntry
-    } : {
-      name,
-      day: activity.day,
-      assignedTo: "—",
-      status: "Not Assigned",
-      timestamp: ""
-    };
+  const reportRows = activities.map(a => {
+    const entry = assigned.find(e => e.name === a.name);
+    return entry
+      ? { ...entry }
+      : { name: a.name, day: a.day, assignedTo: "—", status: "Not Assigned", timestamp: "" };
   });
   tbody.innerHTML = reportRows.map(row => `
     <tr class="status-${row.status.toLowerCase().replace(/\s/g, '')}">
