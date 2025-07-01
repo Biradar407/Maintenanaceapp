@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly Preventive Maintenance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: url('preventive.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      font-size: 16px;
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(to right, #004d40, #00bfa5);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.95);
+      margin: 0 auto;
+      padding: 20px;
+      width: 95%;
+      max-width: 1000px;
+      flex: 1;
+      overflow: hidden;
+      border-radius: 14px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #00796b;
+      font-size: 20px;
+    }
+
+    select, input, button {
+      padding: 12px;
+      margin: 8px 12px 8px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    select[multiple] {
+      height: 90px;
+    }
+
+    input::placeholder {
+      font-size: 16px;
+      font-style: italic;
+    }
+
+    button {
+      background: linear-gradient(to right, #00c853, #00e676);
+      color: white;
+      border: none;
+      font-weight: bold;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #009624, #00c853);
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(to right, #607d8b, #90a4ae);
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(to right, #455a64, #607d8b);
+    }
+
+    .table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #b2dfdb;
+      font-weight: bold;
+      color: #004d40;
+    }
+
+    .timestamp {
+      font-size: 13px;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-pending { background-color: #ffebee; color: #c62828; font-weight: bold; }
+    .status-inprogress { background-color: #fff9c4; color: #f9a825; font-weight: bold; }
+    .status-completed { background-color: #e8f5e9; color: #2e7d32; font-weight: bold; }
+    .status-notassigned { background-color: #eceff1; color: #607d8b; font-weight: bold; }
+
+    @media (max-width: 768px) {
+      th, td {
+        font-size: 13px;
+        padding: 8px;
+      }
+
+      button, select, input {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .table-wrapper {
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>Weekly Preventive Maintenance Activity</header>
+
+<!-- Main Panel -->
+<div class="panel" id="mainPanel">
+  <h2>🛠️ Assign Weekly Activity</h2>
+  <select id="activity">
+    <option value="">Select Activity</option>
+    <option value="CP System(Weekly)">CP System(Weekly)</option>
+    <option value="Battery Sp.Gravity">Battery Sp.Gravity</option>
+    <option value="Vibration Monitoring">Vibration Monitoring</option>
+    <option value="TLD Earthing Relay">TLD Earthing Relay</option>
+    <option value="Motor Body Earthing and Glanding">Motor Body Earthing and Glanding</option>
+    <option value="Panel Cleaning">Panel Cleaning</option>
+    <option value="Solar Panel Cleaning">Solar Panel Cleaning</option>
+  </select>
+  <select id="assignedTo" multiple>
+    <option value="Ashok Patil">Ashok Patil</option>
+    <option value="Gurunath Talawar">Gurunath Talawar</option>
+    <option value="Sudhir Khot">Sudhir Khot</option>
+    <option value="Sunil Kade">Sunil Kade</option>
+  </select>
+  <button onclick="assignActivity()">✅ Assign Task</button>
+  <button class="btn-secondary" onclick="toggleAddPanel(true)">➕ Add New Activity</button>
+  <button class="btn-secondary" onclick="showReportPanel()">📋 Activity Report</button>
+
+  <div class="table-wrapper">
+    <table id="activityTable">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Day</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Update</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Activity Panel -->
+<div class="panel hidden" id="addPanel">
+  <h2>➕ Add New Activity</h2>
+  <input type="text" id="newActivity" placeholder="Enter Activity Name" />
+  <select id="dayPicker">
+    <option value="">Select Day</option>
+    <option>Monday</option>
+    <option>Tuesday</option>
+    <option>Wednesday</option>
+    <option>Thursday</option>
+    <option>Friday</option>
+    <option>Saturday</option>
+    <option>Sunday</option>
+  </select>
+  <br>
+  <button onclick="saveActivity()">💾 Save Activity</button>
+  <button class="btn-secondary" onclick="toggleAddPanel(false)">⬅️ Back</button>
+</div>
+
+<!-- Report Panel -->
+<div class="panel hidden" id="reportPanel">
+  <h2>📋 Activity Status Report</h2>
+  <div class="table-wrapper">
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Day</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <br>
+  <button onclick="generatePDF()">🖨️ Print PDF</button>
+  <button class="btn-secondary" onclick="toggleReportPanel(false)">⬅️ Back</button>
+</div>
+
+<script>
+let activities = [
+  { name: 'CP System(Weekly)', day: 'Tuesday' },
+  { name: 'Battery Sp.Gravity', day: 'Monday' },
+  { name: 'Vibration Monitoring', day: 'Saturday' },
+  { name: 'TLD Earthing Relay', day: 'Wednesday' },
+  { name: 'Motor Body Earthing and Glanding', day: 'Sunday' },
+  { name: 'Panel Cleaning', day: 'Saturday' },
+  { name: 'Solar Panel Cleaning', day: 'Sunday' }
+];
+
+let assigned = [];
+
+function renderTable() {
+  const tbody = document.querySelector("#activityTable tbody");
+  const sorted = [...assigned].sort((a, b) => {
+    const order = { "Completed": 0, "In Progress": 1, "Pending": 2 };
+    return order[a.status] - order[b.status];
+  });
+  tbody.innerHTML = sorted.map((a, i) => `
+    <tr>
+      <td>${a.name}</td>
+      <td>${a.day}</td>
+      <td>${a.assignedTo}</td>
+      <td>
+        <select onchange="updateStatus(this.value, ${i})">
+          <option value="Pending" ${a.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option value="In Progress" ${a.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+          <option value="Completed" ${a.status === 'Completed' ? 'selected' : ''}>Completed</option>
+        </select>
+        <div class="timestamp">${a.timestamp || ''}</div>
+      </td>
+      <td><button onclick="saveStatus(${i})">💾</button></td>
+      <td><button onclick="removeActivity(${i})">🗑️</button></td>
+    </tr>
+  `).join("");
+}
+
+function assignActivity() {
+  const name = document.getElementById("activity").value;
+  const assignedToList = Array.from(document.getElementById("assignedTo").selectedOptions).map(opt => opt.value);
+  const assignedTo = assignedToList.join(", ");
+  const activity = activities.find(a => a.name === name);
+  if (!activity || assignedToList.length === 0) return alert("Select activity and assignees");
+  assigned.push({ ...activity, assignedTo, status: "Pending", timestamp: "" });
+  renderTable();
+}
+
+function saveActivity() {
+  const name = document.getElementById("newActivity").value;
+  const day = document.getElementById("dayPicker").value;
+  if (!name || !day) return alert("Enter activity and select day");
+  activities.push({ name, day });
+  const select = document.getElementById("activity");
+  const option = document.createElement("option");
+  option.text = name;
+  option.value = name;
+  select.add(option);
+  toggleAddPanel(false);
+}
+
+function updateStatus(newStatus, index) {
+  assigned[index].status = newStatus;
+}
+
+function saveStatus(index) {
+  assigned[index].timestamp = new Date().toLocaleString();
+  renderTable();
+}
+
+function removeActivity(index) {
+  assigned.splice(index, 1);
+  renderTable();
+}
+
+function toggleAddPanel(show) {
+  document.getElementById("mainPanel").classList.toggle("hidden", show);
+  document.getElementById("addPanel").classList.toggle("hidden", !show);
+}
+
+function toggleReportPanel(show) {
+  document.getElementById("mainPanel").classList.toggle("hidden", show);
+  document.getElementById("reportPanel").classList.toggle("hidden", !show);
+}
+
+function showReportPanel() {
+  const tbody = document.querySelector("#reportTable tbody");
+  const allActivityNames = activities.map(a => a.name);
+  const reportRows = allActivityNames.map(name => {
+    const assignedEntry = assigned.find(a => a.name === name);
+    if (assignedEntry) {
+      return {
+        name: assignedEntry.name,
+        day: assignedEntry.day,
+        assignedTo: assignedEntry.assignedTo,
+        status: assignedEntry.status,
+        timestamp: assignedEntry.timestamp || '',
+      };
+    } else {
+      const act = activities.find(a => a.name === name);
+      return {
+        name,
+        day: act.day,
+        assignedTo: "—",
+        status: "Not Assigned",
+        timestamp: "",
+      };
+    }
+  });
+
+  tbody.innerHTML = reportRows.map(row => `
+    <tr class="status-${row.status.toLowerCase().replace(/\s/g, '')}">
+      <td>${row.name}</td>
+      <td>${row.day}</td>
+      <td>${row.assignedTo}</td>
+      <td>${row.status}</td>
+      <td>${row.timestamp}</td>
+    </tr>
+  `).join("");
+  toggleReportPanel(true);
+}
+
+function generatePDF() {
+  window.print();
+}
+</script>
+
+</body>
+</html>
