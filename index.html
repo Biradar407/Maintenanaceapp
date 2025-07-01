@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,129 +11,132 @@
       background: url('tool.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #333;
-    }
+    }header {
+  background: linear-gradient(135deg, #4b0082, #800080);
+  color: white;
+  text-align: center;
+  padding: 20px 10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
 
-    header {
-      background: linear-gradient(135deg, #4b0082, #800080);
-      color: white;
-      text-align: center;
-      padding: 20px 10px;
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
+.action-bar {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+}
 
-    .action-bar {
-      background-color: #1e3a8a;
-      color: white;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      font-weight: bold;
-    }
+.action-bar span {
+  margin-left: 10px;
+  font-size: 16px;
+}
 
-    .action-bar span {
-      margin-left: 10px;
-      font-size: 16px;
-    }
+.activity-menu {
+  display: none;
+  background-color: #f9f9f9;
+  padding: 10px 16px;
+  border-bottom: 2px solid #ddd;
+}
 
-    .activity-menu {
-      display: none;
-      background-color: #f9f9f9;
-      padding: 10px 16px;
-      border-bottom: 2px solid #ddd;
-    }
+.activity-menu button {
+  display: block;
+  width: 100%;
+  background-color: #1e3a8a;
+  color: white;
+  padding: 10px;
+  margin: 6px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-    .activity-menu button {
-      display: block;
-      width: 100%;
-      background-color: #1e3a8a;
-      color: white;
-      padding: 10px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
+.activity-menu button:hover {
+  background-color: #2c4db0;
+}
 
-    .activity-menu button:hover {
-      background-color: #2c4db0;
-    }
+.status-cards {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-    .status-cards {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  padding: 18px 20px;
+  border-left: 8px solid;
+  cursor: pointer;
+}
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      padding: 18px 20px;
-      border-left: 8px solid;
-    }
+.pending {
+  border-color: red;
+}
 
-    .pending {
-      border-color: red;
-    }
+.in-progress {
+  border-color: orange;
+}
 
-    .in-progress {
-      border-color: orange;
-    }
+.completed {
+  border-color: green;
+}
 
-    .completed {
-      border-color: green;
-    }
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
 
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-    }
+.card p {
+  margin: 0;
+  font-size: 15px;
+  color: #555;
+}
 
-    .card p {
-      margin: 0;
-      font-size: 15px;
-      color: #555;
-    }
+.details-panel {
+  display: none;
+  background: rgba(255,255,255,0.95);
+  margin: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
 
-    @media (max-width: 600px) {
-      .status-cards {
-        padding: 10px;
-      }
+@media (max-width: 600px) {
+  .status-cards {
+    padding: 10px;
+  }
 
-      .card h3 {
-        font-size: 16px;
-      }
+  .card h3 {
+    font-size: 16px;
+  }
 
-      .card p {
-        font-size: 14px;
-      }
+  .card p {
+    font-size: 14px;
+  }
 
-      .activity-menu button {
-        font-size: 14px;
-        padding: 8px;
-      }
-    }
+  .activity-menu button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
   </style>
 </head>
-<body>
-
-  <header>
+<body>  <header>
     Indane Bottling Plant, Belgaum BP — Team NS Engineers
-  </header>
-
-  <div class="action-bar" onclick="toggleMenu()">
+  </header>  <div class="action-bar" onclick="toggleMenu()">
     ☰ <span>Activity Menu</span>
-  </div>
-
-  <div class="activity-menu" id="activityMenu">
+  </div>  <div class="activity-menu" id="activityMenu">
     <button onclick="openActivity('breakdown.html')">🔧 Breakdown Reporting</button>
     <button onclick="openActivity('Monthly Borewell Reading.html')">💧 Monthly Borewell Reading</button>
     <button onclick="openActivity('Piezometer.html')">🌊 Piezometer</button>
@@ -143,27 +145,23 @@
     <button onclick="openActivity('Quarterly Activity.html')">📘 Quarterly Activity</button>
     <button onclick="openActivity('Half Yearly.html')">🗓️ Half Yearly</button>
     <button onclick="openActivity('Yearly.html')">📖 Yearly</button>
-    <button onclick="openActivity('assign.html')">📌 Assign Task</button> <!-- ← Updated line -->
+    <button onclick="openActivity('assign.html')">📌 Assign Task</button>
     <button onclick="openActivity('Spares Availability.html')">⚙️ Spares Availability</button>
     <button onclick="openActivity('Procure Spares.html')">🧾 Procure Spares</button>
-  </div>
-
-  <div class="status-cards" id="statusCards">
-    <div class="card pending">
+  </div>  <div class="status-cards" id="statusCards">
+    <div class="card pending" onclick="showDetails('pending')">
       <h3>Pending Tasks</h3>
       <p>6 activities have pending items. Please follow up urgently.</p>
     </div>
-    <div class="card in-progress">
+    <div class="card in-progress" onclick="showDetails('in-progress')">
       <h3>In Progress</h3>
       <p>4 tasks are actively being worked on this week.</p>
     </div>
-    <div class="card completed">
+    <div class="card completed" onclick="showDetails('completed')">
       <h3>Completed</h3>
       <p>9 tasks were successfully completed and logged.</p>
     </div>
-  </div>
-
-  <script>
+  </div>  <div id="detailsPanel" class="details-panel"></div>  <script>
     function toggleMenu() {
       const menu = document.getElementById('activityMenu');
       const cards = document.getElementById('statusCards');
@@ -176,7 +174,19 @@
     function openActivity(filename) {
       window.location.href = filename;
     }
-  </script>
 
-</body>
+    function showDetails(status) {
+      const panel = document.getElementById('detailsPanel');
+      let content = '';
+      if (status === 'pending') {
+        content = '<h3>Pending Tasks Details</h3><ul><li>Fire hydrant flushing</li><li>Battery specific gravity</li><li>Vibration monitoring</li></ul>';
+      } else if (status === 'in-progress') {
+        content = '<h3>In Progress Tasks</h3><ul><li>Weekly CP reading</li><li>TLD ROV interlock check</li></ul>';
+      } else if (status === 'completed') {
+        content = '<h3>Completed Tasks</h3><ul><li>Monthly equipment inspection</li><li>Annual air receiver cleaning</li></ul>';
+      }
+      panel.innerHTML = content;
+      panel.style.display = 'block';
+    }
+  </script></body>
 </html>
