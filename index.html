@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -125,7 +126,6 @@
   </style>
 </head>
 <body>
-
   <header>
     Indane Bottling Plant, Belgaum BP — Team NS Engineers
   </header>
@@ -135,15 +135,15 @@
   </div>
 
   <div class="activity-menu" id="activityMenu">
-    <button onclick="openActivity('Breakdown Reporting')">Breakdown Reporting</button>
-    <button onclick="openActivity('Weekly Activity')">Weekly Activity</button>
-    <button onclick="openActivity('Monthly Activity')">Monthly Activity</button>
-    <button onclick="openActivity('Quarterly Activity')">Quarterly Activity</button>
-    <button onclick="openActivity('Half Yearly')">Half Yearly</button>
-    <button onclick="openActivity('Yearly')">Yearly</button>
-    <button onclick="openActivity('Assign Task')">Assign Task</button>
-    <button onclick="openActivity('Spares Availability')">Spares Availability</button>
-    <button onclick="openActivity('Procure Spares')">Procure Spares</button>
+    <button onclick="openActivity('breakdown.html')">Breakdown Reporting</button>
+    <button onclick="openActivity('weekly-activity.html')">Weekly Activity</button>
+    <button onclick="openActivity('monthly-activity.html')">Monthly Activity</button>
+    <button onclick="openActivity('quarterly-activity.html')">Quarterly Activity</button>
+    <button onclick="openActivity('half-yearly.html')">Half Yearly</button>
+    <button onclick="openActivity('yearly-activity.html')">Yearly</button>
+    <button onclick="openActivity('assign-task.html')">Assign Task</button>
+    <button onclick="openActivity('spares-availability.html')">Spares Availability</button>
+    <button onclick="openActivity('procure-spares.html')">Procure Spares</button>
   </div>
 
   <div class="status-cards" id="statusCards">
@@ -170,24 +170,9 @@
       cards.style.display = isOpen ? 'block' : 'none';
     }
 
-    function openActivity(activityName) {
-      const pageMap = {
-        'Breakdown Reporting': 'breakdown.html',
-        'Weekly Activity': 'weekly.html',
-        'Monthly Activity': 'monthly.html',
-        'Quarterly Activity': 'quarterly.html',
-        'Half Yearly': 'halfyearly.html',
-        'Yearly': 'yearly.html',
-        'Assign Task': 'assign.html',
-        'Spares Availability': 'spares.html',
-        'Procure Spares': 'procure.html'
-      };
-
-      if (pageMap[activityName]) {
-        window.location.href = pageMap[activityName];
-      }
+    function openActivity(pageUrl) {
+      window.location.href = pageUrl;
     }
   </script>
-
 </body>
 </html>
