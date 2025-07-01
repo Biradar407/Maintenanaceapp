@@ -222,7 +222,6 @@ let activities = [];
 let assigned = [];
 
 function init() {
-  // Load from localStorage
   activities = JSON.parse(localStorage.getItem('qtrActivities')) || [];
   assigned = JSON.parse(localStorage.getItem('qtrAssigned')) || [];
   renderActivityDropdown();
