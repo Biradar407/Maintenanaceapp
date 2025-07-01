@@ -92,16 +92,12 @@
       display: none;
     }
 
-    .search-footer {
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.9);
-      border-top: 2px solid #ccc;
-      margin-top: 30px;
-      max-width: 1000px;
-      margin-left: auto;
-      margin-right: auto;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .search-controls {
+      margin: 16px 0;
+    }
+
+    .search-controls label {
+      margin-right: 10px;
     }
 
     .report-controls {
@@ -141,6 +137,12 @@
 
 <div class="panel hidden" id="searchPanel">
   <h2 id="reportHeader"></h2>
+
+  <div class="search-controls">
+    <label>From: <input type="date" id="fromDate" /></label>
+    <label>To: <input type="date" id="toDate" /></label>
+    <button onclick="searchReadings()">🔎 Search</button>
+  </div>
 
   <table id="searchTable">
     <thead>
@@ -224,12 +226,12 @@ function deleteReading(index) {
 function showSearchPanel() {
   document.getElementById("mainPanel").classList.add("hidden");
   document.getElementById("searchPanel").classList.remove("hidden");
-  searchReadings();
 }
 
 function searchReadings() {
-  const from = document.getElementById("readingDate").value || "";
-  const to = from;
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+  if (!from || !to) return alert("Select both From and To dates");
   const result = readings.filter(r => r.date >= from && r.date <= to);
   const tbody = document.querySelector("#searchTable tbody");
   const header = document.getElementById("reportHeader");
