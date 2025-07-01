@@ -154,7 +154,7 @@
     }
   </style>
 </head>
-<body onload="checkReminders()">
+<body onload="init()">
 
 <header>Quarterly Preventive Maintenance Activity</header>
 
@@ -221,19 +221,38 @@
 let activities = [];
 let assigned = [];
 
+function init() {
+  // Load from localStorage
+  activities = JSON.parse(localStorage.getItem('qtrActivities')) || [];
+  assigned = JSON.parse(localStorage.getItem('qtrAssigned')) || [];
+  renderActivityDropdown();
+  renderTable();
+}
+
+function saveToLocal() {
+  localStorage.setItem('qtrActivities', JSON.stringify(activities));
+  localStorage.setItem('qtrAssigned', JSON.stringify(assigned));
+}
+
+function renderActivityDropdown() {
+  const select = document.getElementById("activity");
+  select.innerHTML = `<option value="">Select Activity</option>`;
+  activities.forEach(name => {
+    const option = document.createElement("option");
+    option.text = name;
+    option.value = name;
+    select.add(option);
+  });
+}
+
 function saveActivity() {
   const name = document.getElementById("newActivity").value.trim();
   if (!name) return alert("Please enter activity name.");
   if (activities.includes(name)) return alert("Activity already exists.");
   activities.push(name);
-
-  const select = document.getElementById("activity");
-  const option = document.createElement("option");
-  option.text = name;
-  option.value = name;
-  select.add(option);
-
   document.getElementById("newActivity").value = '';
+  saveToLocal();
+  renderActivityDropdown();
   toggleAddPanel(false);
 }
 
@@ -247,6 +266,7 @@ function assignActivity() {
     status: "Pending",
     timestamp: ""
   });
+  saveToLocal();
   renderTable();
 }
 
@@ -281,11 +301,13 @@ function updateStatus(newStatus, index) {
 
 function saveStatus(index) {
   assigned[index].timestamp = new Date().toLocaleString();
+  saveToLocal();
   renderTable();
 }
 
 function removeActivity(index) {
   assigned.splice(index, 1);
+  saveToLocal();
   renderTable();
 }
 
@@ -296,7 +318,6 @@ function toggleAddPanel(show) {
 
 function showReportPanel() {
   const tbody = document.querySelector("#reportTable tbody");
-
   const reportRows = activities.map(name => {
     const entry = assigned.find(a => a.name === name);
     return entry
@@ -323,13 +344,6 @@ function toggleReportPanel(show) {
 
 function generatePDF() {
   window.print();
-}
-
-function checkReminders() {
-  const now = new Date();
-  if (now.getDate() <= 5 && now.getHours() === 10) {
-    alert("🔔 Reminder: Please update your Quarterly Maintenance Tasks!");
-  }
 }
 </script>
 
