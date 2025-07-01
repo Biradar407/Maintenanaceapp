@@ -12,27 +12,25 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background: url('monthly.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background: #f5f5f5;
       color: #333;
       font-size: 16px;
       overflow: hidden;
     }
 
     header {
-      background: linear-gradient(to right, #004d40, #00bfa5);
+      background: linear-gradient(to right, #1565c0, #42a5f5);
       color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 24px;
+      padding: 10px 20px;
+      font-size: 18px;
       font-weight: bold;
-      text-shadow: 1px 1px 2px #000;
+      text-align: right;
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
       flex-shrink: 0;
     }
 
     .panel {
-      background: rgba(255,255,255,0.95);
+      background: white;
       margin: 0 auto;
       padding: 20px;
       width: 95%;
@@ -47,7 +45,7 @@
 
     h2 {
       margin-top: 0;
-      color: #00796b;
+      color: #1565c0;
       font-size: 20px;
     }
 
@@ -70,7 +68,7 @@
     }
 
     button {
-      background: linear-gradient(to right, #00c853, #00e676);
+      background: linear-gradient(to right, #3949ab, #5c6bc0);
       color: white;
       border: none;
       font-weight: bold;
@@ -78,16 +76,17 @@
     }
 
     button:hover {
-      background: linear-gradient(to right, #009624, #00c853);
+      background: linear-gradient(to right, #303f9f, #3949ab);
       cursor: pointer;
     }
 
     .btn-secondary {
-      background: linear-gradient(to right, #607d8b, #90a4ae);
+      background: linear-gradient(to right, #90a4ae, #cfd8dc);
+      color: #333;
     }
 
     .btn-secondary:hover {
-      background: linear-gradient(to right, #455a64, #607d8b);
+      background: linear-gradient(to right, #78909c, #b0bec5);
     }
 
     .table-wrapper {
@@ -109,9 +108,9 @@
     }
 
     th {
-      background: #b2dfdb;
+      background: #e3f2fd;
       font-weight: bold;
-      color: #004d40;
+      color: #0d47a1;
     }
 
     .timestamp {
@@ -146,24 +145,13 @@
     }
   </style>
 </head>
-<body onload="checkReminders()">
+<body onload="loadData(); checkReminders()">
 
 <header>Monthly Preventive Maintenance Activity</header>
 
-<!-- Main Panel -->
 <div class="panel" id="mainPanel">
   <h2>🛠️ Assign Monthly Activity</h2>
-  <select id="activity">
-    <option value="">Select Activity</option>
-    <option value="110V Battery Bank - Specific gravity checking">110V Battery Bank - Specific gravity checking</option>
-    <option value="CCTV Battery Bank - Specific gravity checking">CCTV Battery Bank - Specific gravity checking</option>
-    <option value="10 KVA UPS - Battery checking">10 KVA UPS - Battery checking</option>
-    <option value="6 KVA UPS - Battery checking">6 KVA UPS - Battery checking</option>
-    <option value="10 KVA Microtek UPS - Battery checking">10 KVA Microtek UPS - Battery checking</option>
-    <option value="ELCB Tripping test">ELCB Tripping test</option>
-    <option value="Safety Tripping Check">Safety Tripping Check</option>
-    <option value="Capacitor Bank - Current monitoring">Capacitor Bank - Current monitoring</option>
-  </select>
+  <select id="activity"></select>
   <select id="assignedTo" multiple>
     <option value="Ashok Patil">Ashok Patil</option>
     <option value="Gurunath Talawar">Gurunath Talawar</option>
@@ -190,7 +178,6 @@
   </div>
 </div>
 
-<!-- Add New Activity Panel -->
 <div class="panel hidden" id="addPanel">
   <h2>➕ Add Custom Monthly Activity</h2>
   <input type="text" id="newActivity" placeholder="Enter Activity Name" />
@@ -199,7 +186,6 @@
   <button class="btn-secondary" onclick="toggleAddPanel(false)">⬅️ Back</button>
 </div>
 
-<!-- Activity Report Panel -->
 <div class="panel hidden" id="reportPanel">
   <h2>📋 Activity Status Report</h2>
   <div class="table-wrapper">
@@ -221,7 +207,7 @@
 </div>
 
 <script>
-let activities = [
+let activities = JSON.parse(localStorage.getItem("monthlyActivities")) || [
   "110V Battery Bank - Specific gravity checking",
   "CCTV Battery Bank - Specific gravity checking",
   "10 KVA UPS - Battery checking",
@@ -232,7 +218,24 @@ let activities = [
   "Capacitor Bank - Current monitoring"
 ];
 
-let assigned = [];
+let assigned = JSON.parse(localStorage.getItem("monthlyAssigned")) || [];
+
+function loadData() {
+  const select = document.getElementById("activity");
+  select.innerHTML = '<option value="">Select Activity</option>';
+  activities.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  renderTable();
+}
+
+function saveData() {
+  localStorage.setItem("monthlyActivities", JSON.stringify(activities));
+  localStorage.setItem("monthlyAssigned", JSON.stringify(assigned));
+}
 
 function renderTable() {
   const tbody = document.querySelector("#activityTable tbody");
@@ -269,6 +272,7 @@ function assignActivity() {
     status: "Pending",
     timestamp: ""
   });
+  saveData();
   renderTable();
 }
 
@@ -277,14 +281,15 @@ function saveActivity() {
   if (!newActivity) return alert("Please enter activity name.");
   activities.push(newActivity);
 
-  const activitySelect = document.getElementById("activity");
+  const select = document.getElementById("activity");
   const opt = document.createElement("option");
   opt.value = newActivity;
   opt.textContent = newActivity;
-  activitySelect.appendChild(opt);
+  select.appendChild(opt);
 
-  toggleAddPanel(false);
   document.getElementById("newActivity").value = '';
+  toggleAddPanel(false);
+  saveData();
 }
 
 function updateStatus(newStatus, index) {
@@ -293,11 +298,13 @@ function updateStatus(newStatus, index) {
 
 function saveStatus(index) {
   assigned[index].timestamp = new Date().toLocaleString();
+  saveData();
   renderTable();
 }
 
 function removeActivity(index) {
   assigned.splice(index, 1);
+  saveData();
   renderTable();
 }
 
