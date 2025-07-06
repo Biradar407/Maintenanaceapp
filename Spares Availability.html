@@ -22,12 +22,8 @@
       justify-content: space-between;
       align-items: center;
     }
-    header span {
-      margin-left: 10px;
-    }
     header img {
-      height: 50px;
-      margin-right: 10px;
+      height: 40px;
     }
     .container {
       padding: 15px;
@@ -95,13 +91,39 @@
     th {
       background: #b2dfdb;
     }
+
+    /* Updated Popup */
+    .popup, .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .popup {
+      background: #eeeeee;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1001;
+      flex-direction: column;
+      width: 90%;
+      max-width: 320px;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .hidden-popup { display: none; }
   </style>
 </head>
 <body>
   <header>
     <span>Spare Inventory Management</span>
-    <img src="5s.jpg" alt="Logo">
+    <img src="5s.jpg" alt="Logo" />
   </header>
+
   <div class="container">
     <div class="toolbar">
       <button class="btn" onclick="showPanel('categoryPanel')">➕ Add Category</button>
@@ -126,7 +148,7 @@
 
     <div id="sparePanel" class="panel hidden">
       <h3>🧰 Add Spare</h3>
-      <select id="spareCatSelect"></select>
+      <select id="spareCatSelect" onchange="loadSpareFields()"></select>
       <div id="spareFields"></div>
       <button class="btn" onclick="saveSpare()">💾 Save Spare</button>
     </div>
@@ -144,151 +166,201 @@
     </div>
   </div>
 
-<script>
-let db;
+  <!-- Popup Window -->
+  <div id="popup" class="popup hidden-popup">
+    <label>Issue Qty:</label>
+    <input type="number" id="popupIssue">
+    <label>Receive Qty:</label>
+    <input type="number" id="popupReceive">
+    <button class="btn" onclick="updateQty()">Update</button>
+  </div>
+  <div id="overlay" class="overlay hidden-popup" onclick="closePopup()"></div>
 
-const openDB = indexedDB.open("SpareDB", 1);
-openDB.onupgradeneeded = e => {
-  db = e.target.result;
-  db.createObjectStore("categories", { keyPath: "name" });
-  db.createObjectStore("spares", { autoIncrement: true });
-};
-openDB.onsuccess = e => {
-  db = e.target.result;
-  refreshCategoryDropdowns();
-};
+  <script>
+    let db, selectedKey = null, selectedField = null;
 
-function showPanel(id) {
-  document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  if (id === 'sparePanel') loadSpareCategories();
-  if (id === 'availabilityPanel') loadSpareCategories('availCatSelect');
-  if (id === 'pdfPanel') loadSpareCategories('pdfCatSelect');
-}
+    const openDB = indexedDB.open("SpareDB", 1);
+    openDB.onupgradeneeded = e => {
+      db = e.target.result;
+      db.createObjectStore("categories", { keyPath: "name" });
+      db.createObjectStore("spares", { keyPath: "id", autoIncrement: true });
+    };
+    openDB.onsuccess = e => {
+      db = e.target.result;
+      loadSpareCategories("categorySelect");
+    };
 
-function addCustomField() {
-  const div = document.createElement("div");
-  div.className = "field-row";
-  div.innerHTML = `<input type="text" class="field-name" placeholder="Field Name" />`;
-  document.getElementById("customFields").appendChild(div);
-}
+    function showPanel(id) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      if (id === 'sparePanel') loadSpareCategories();
+      if (id === 'availabilityPanel') loadSpareCategories('availCatSelect');
+      if (id === 'pdfPanel') loadSpareCategories('pdfCatSelect');
+    }
 
-function saveCategory() {
-  const name = document.getElementById("categoryName").value.trim();
-  if (!name) return alert("Enter category name");
-  const fields = [...document.querySelectorAll(".field-name")].map(f => f.value.trim()).filter(Boolean);
-  const tx = db.transaction("categories", "readwrite");
-  tx.objectStore("categories").put({ name, fields });
-  tx.oncomplete = () => {
-    alert("Category saved");
-    document.getElementById("categoryName").value = "";
-    document.getElementById("customFields").innerHTML = "";
-    refreshCategoryDropdowns();
-  };
-}
-
-function deleteCategory() {
-  const name = document.getElementById("categorySelect").value;
-  if (!name) return alert("Select category to delete");
-  const pass = prompt("Enter admin passcode to delete:");
-  if (pass !== "!234$") return alert("Incorrect passcode!");
-  const tx = db.transaction("categories", "readwrite");
-  tx.objectStore("categories").delete(name).onsuccess = () => {
-    alert("Category deleted");
-    refreshCategoryDropdowns();
-    document.getElementById("categoryName").value = "";
-    document.getElementById("customFields").innerHTML = "";
-  };
-}
-
-function loadCategoryFields() {
-  const name = document.getElementById("categorySelect").value;
-  if (!name) {
-    document.getElementById("categoryName").value = "";
-    document.getElementById("customFields").innerHTML = "";
-    return;
-  }
-  db.transaction("categories").objectStore("categories").get(name).onsuccess = e => {
-    const data = e.target.result;
-    document.getElementById("categoryName").value = data.name;
-    const container = document.getElementById("customFields");
-    container.innerHTML = "";
-    data.fields.forEach(f => {
+    function addCustomField() {
       const div = document.createElement("div");
       div.className = "field-row";
-      div.innerHTML = `<input type="text" class="field-name" value="${f}" />`;
-      container.appendChild(div);
-    });
-  };
-}
+      div.innerHTML = `<input type="text" class="field-name" placeholder="Field Name" />`;
+      document.getElementById("customFields").appendChild(div);
+    }
 
-function refreshCategoryDropdowns() {
-  loadSpareCategories("categorySelect");
-}
+    function saveCategory() {
+      const name = document.getElementById("categoryName").value.trim();
+      if (!name) return alert("Enter category name");
+      const fields = [...document.querySelectorAll(".field-name")].map(f => f.value.trim()).filter(Boolean);
+      db.transaction("categories", "readwrite").objectStore("categories").put({ name, fields }).oncomplete = () => {
+        alert("Category saved");
+        document.getElementById("categoryName").value = "";
+        document.getElementById("customFields").innerHTML = "";
+        loadSpareCategories("categorySelect");
+      };
+    }
 
-function loadSpareCategories(targetId) {
-  const ids = targetId ? [targetId] : ["spareCatSelect", "availCatSelect", "pdfCatSelect"];
-  ids.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    sel.innerHTML = `<option value="">-- Select --</option>`;
-  });
-  db.transaction("categories").objectStore("categories").getAll().onsuccess = e => {
-    e.target.result.forEach(c => {
+    function deleteCategory() {
+      const name = document.getElementById("categorySelect").value;
+      if (!name) return alert("Select category to delete");
+      const pass = prompt("Enter admin passcode to delete:");
+      if (pass !== "!234$") return alert("Incorrect passcode!");
+      db.transaction("categories", "readwrite").objectStore("categories").delete(name).onsuccess = () => {
+        alert("Category deleted");
+        loadSpareCategories("categorySelect");
+      };
+    }
+
+    function loadCategoryFields() {
+      const name = document.getElementById("categorySelect").value;
+      if (!name) {
+        document.getElementById("categoryName").value = "";
+        document.getElementById("customFields").innerHTML = "";
+        return;
+      }
+      db.transaction("categories").objectStore("categories").get(name).onsuccess = e => {
+        const data = e.target.result;
+        document.getElementById("categoryName").value = data.name;
+        const container = document.getElementById("customFields");
+        container.innerHTML = "";
+        data.fields.forEach(f => {
+          const div = document.createElement("div");
+          div.className = "field-row";
+          div.innerHTML = `<input type="text" class="field-name" value="${f}" />`;
+          container.appendChild(div);
+        });
+      };
+    }
+
+    function loadSpareCategories(targetId) {
+      const ids = targetId ? [targetId] : ["spareCatSelect", "availCatSelect", "pdfCatSelect"];
       ids.forEach(id => {
         const sel = document.getElementById(id);
-        if (sel) sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+        if (sel) sel.innerHTML = `<option value="">-- Select --</option>`;
       });
-    });
-  };
-}
+      db.transaction("categories").objectStore("categories").getAll().onsuccess = e => {
+        e.target.result.forEach(c => {
+          ids.forEach(id => {
+            const sel = document.getElementById(id);
+            if (sel) sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+          });
+        });
+      };
+    }
 
-function saveSpare() {
-  const cat = document.getElementById("spareCatSelect").value;
-  if (!cat) return alert("Select category");
-  const fields = {};
-  document.querySelectorAll("#spareFields input").forEach(input => {
-    if (input.value.trim()) fields[input.dataset.field] = input.value.trim();
-  });
-  db.transaction("spares", "readwrite").objectStore("spares").add({ category: cat, fields });
-  alert("Spare saved");
-}
+    function loadSpareFields() {
+      const cat = document.getElementById("spareCatSelect").value;
+      const container = document.getElementById("spareFields");
+      container.innerHTML = "";
+      if (!cat) return;
+      db.transaction("categories").objectStore("categories").get(cat).onsuccess = e => {
+        const fields = e.target.result.fields;
+        fields.forEach(f => {
+          const div = document.createElement("div");
+          div.className = "field-row";
+          div.innerHTML = `<input data-field="${f}" placeholder="${f} Part No." /> <input type="number" data-qty="${f}" placeholder="Qty" />`;
+          container.appendChild(div);
+        });
+      };
+    }
 
-function loadAvailability() {
-  const cat = document.getElementById("availCatSelect").value;
-  const table = document.getElementById("availabilityTable");
-  table.innerHTML = "";
-  const t = document.createElement("table");
-  t.innerHTML = `<tr><th>Field</th><th>Value</th></tr>`;
-  db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
-    e.target.result.forEach(s => {
-      if (s.category === cat) {
-        for (const key in s.fields) {
-          t.innerHTML += `<tr><td>${key}</td><td>${s.fields[key]}</td></tr>`;
-        }
-      }
-    });
-  };
-  table.appendChild(t);
-}
+    function saveSpare() {
+      const cat = document.getElementById("spareCatSelect").value;
+      if (!cat) return alert("Select category");
+      const fields = {};
+      document.querySelectorAll("#spareFields .field-row").forEach(row => {
+        const field = row.querySelector("[data-field]").dataset.field;
+        const partNo = row.querySelector("[data-field]").value;
+        const qty = parseInt(row.querySelector("[data-qty]").value) || 0;
+        fields[field] = { partNo, qty };
+      });
+      db.transaction("spares", "readwrite").objectStore("spares").add({ category: cat, fields });
+      alert("Spare saved");
+    }
 
-function exportPDF() {
-  const cat = document.getElementById("pdfCatSelect").value;
-  db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
-    let content = `<h3>${cat} - Spare Inventory</h3><table border="1" style="width:100%;border-collapse:collapse"><tr><th>Field</th><th>Value</th></tr>`;
-    e.target.result.forEach(s => {
-      if (s.category === cat) {
-        for (const key in s.fields) {
-          content += `<tr><td>${key}</td><td>${s.fields[key]}</td></tr>`;
-        }
-      }
-    });
-    content += `</table>`;
-    const win = window.open("", "", "width=800,height=600");
-    win.document.write(`<html><head><title>${cat} Report</title></head><body>${content}</body></html>`);
-    win.print();
-  };
-}
-</script>
+    function loadAvailability() {
+      const cat = document.getElementById("availCatSelect").value;
+      const div = document.getElementById("availabilityTable");
+      div.innerHTML = "";
+      const table = document.createElement("table");
+      table.innerHTML = `<tr><th>Field</th><th>Part No.</th><th>Qty</th></tr>`;
+      db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
+        e.target.result.forEach(s => {
+          if (s.category === cat) {
+            for (const key in s.fields) {
+              const row = document.createElement("tr");
+              row.innerHTML = `<td>${key}</td><td>${s.fields[key].partNo}</td><td>${s.fields[key].qty}</td>`;
+              row.ondblclick = () => openPopup(s.id, key);
+              table.appendChild(row);
+            }
+          }
+        });
+        div.appendChild(table);
+      };
+    }
+
+    function openPopup(id, field) {
+      selectedKey = id;
+      selectedField = field;
+      document.getElementById("popupIssue").value = 0;
+      document.getElementById("popupReceive").value = 0;
+      document.getElementById("popup").classList.remove("hidden-popup");
+      document.getElementById("overlay").classList.remove("hidden-popup");
+    }
+
+    function closePopup() {
+      document.getElementById("popup").classList.add("hidden-popup");
+      document.getElementById("overlay").classList.add("hidden-popup");
+    }
+
+    function updateQty() {
+      const issue = parseInt(document.getElementById("popupIssue").value) || 0;
+      const receive = parseInt(document.getElementById("popupReceive").value) || 0;
+      const tx = db.transaction("spares", "readwrite");
+      const store = tx.objectStore("spares");
+      store.get(selectedKey).onsuccess = e => {
+        const data = e.target.result;
+        data.fields[selectedField].qty = data.fields[selectedField].qty - issue + receive;
+        store.put(data);
+        closePopup();
+        loadAvailability();
+      };
+    }
+
+    function exportPDF() {
+      const cat = document.getElementById("pdfCatSelect").value;
+      db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
+        let content = `<h3>${cat} - Spare Inventory</h3><table border="1" style="width:100%;border-collapse:collapse"><tr><th>Field</th><th>Part No.</th><th>Qty</th></tr>`;
+        e.target.result.forEach(s => {
+          if (s.category === cat) {
+            for (const key in s.fields) {
+              content += `<tr><td>${key}</td><td>${s.fields[key].partNo}</td><td>${s.fields[key].qty}</td></tr>`;
+            }
+          }
+        });
+        content += `</table>`;
+        const win = window.open("", "", "width=800,height=600");
+        win.document.write(`<html><head><title>${cat} Report</title></head><body>${content}</body></html>`);
+        win.print();
+      };
+    }
+  </script>
 </body>
 </html>
