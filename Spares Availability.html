@@ -29,7 +29,7 @@
       padding: 15px;
     }
     .btn {
-      padding: 12px 18px;
+      padding: 10px 15px;
       border: none;
       border-radius: 6px;
       color: white;
@@ -100,8 +100,6 @@
     th {
       background: #b2dfdb;
     }
-
-    /* Popup Styling */
     .popup {
       position: fixed;
       top: 50%;
@@ -192,7 +190,7 @@
     </div>
   </div>
 
-  <!-- Popup -->
+  <!-- Popup for Editing Qty -->
   <div id="popup" class="popup hidden-popup">
     <label>Issue Qty</label>
     <input type="number" id="popupIssue" />
@@ -337,7 +335,7 @@
       const div = document.getElementById("availabilityTable");
       div.innerHTML = "";
       const table = document.createElement("table");
-      table.innerHTML = `<tr><th>Field</th><th>Part No.</th><th>Qty</th><th>Last Updated</th></tr>`;
+      table.innerHTML = `<tr><th>Field</th><th>Part No.</th><th>Qty</th><th>Last Updated</th><th>Action</th></tr>`;
       db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
         e.target.result.forEach(s => {
           if (s.category === cat) {
@@ -345,8 +343,13 @@
               const field = s.fields[key];
               const timestamp = field.lastUpdated || "-";
               const row = document.createElement("tr");
-              row.innerHTML = `<td>${key}</td><td>${field.partNo}</td><td>${field.qty}</td><td>${timestamp}</td>`;
-              row.ondblclick = () => openPopup(s.id, key);
+              row.innerHTML = `
+                <td>${key}</td>
+                <td>${field.partNo}</td>
+                <td>${field.qty}</td>
+                <td>${timestamp}</td>
+                <td><button class="btn btn-primary" onclick="openPopup(${s.id}, '${key}')">✏️ Edit</button></td>
+              `;
               table.appendChild(row);
             }
           }
@@ -360,7 +363,6 @@
       selectedField = field;
       document.getElementById("popupIssue").value = "";
       document.getElementById("popupReceive").value = "";
-
       const tx = db.transaction("spares", "readonly");
       tx.objectStore("spares").get(id).onsuccess = e => {
         const data = e.target.result;
@@ -378,23 +380,21 @@
       const issue = parseInt(document.getElementById("popupIssue").value) || 0;
       const receive = parseInt(document.getElementById("popupReceive").value) || 0;
       const now = new Date().toLocaleString();
-
       const tx = db.transaction("spares", "readwrite");
       const store = tx.objectStore("spares");
       store.get(selectedKey).onsuccess = e => {
         const data = e.target.result;
         const current = data.fields[selectedField].qty;
         const updatedQty = current - issue + receive;
-
         data.fields[selectedField] = {
           ...data.fields[selectedField],
           qty: updatedQty,
           lastUpdated: now
         };
-
-        store.put(data);
-        closePopup();
-        loadAvailability();
+        store.put(data).onsuccess = () => {
+          closePopup();
+          loadAvailability();
+        };
       };
     }
 
