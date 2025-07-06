@@ -17,10 +17,10 @@
       padding: 15px;
       font-size: 24px;
       font-weight: bold;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     header img {
       height: 40px;
@@ -29,8 +29,7 @@
       padding: 15px;
     }
     .btn {
-      padding: 10px 15px;
-      background: linear-gradient(to right, #00695c, #26a69a);
+      padding: 12px 18px;
       border: none;
       border-radius: 6px;
       color: white;
@@ -39,8 +38,17 @@
       transition: 0.3s;
       box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     }
-    .btn:hover {
+    .btn-primary {
+      background: linear-gradient(to right, #00695c, #26a69a);
+    }
+    .btn-primary:hover {
       background: linear-gradient(to right, #004d40, #00796b);
+    }
+    .btn-success {
+      background: linear-gradient(to right, #2e7d32, #66bb6a);
+    }
+    .btn-danger {
+      background: linear-gradient(to right, #c62828, #ef5350);
     }
     .toolbar {
       display: flex;
@@ -59,11 +67,12 @@
     .hidden { display: none; }
     input, select {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       border-radius: 6px;
       margin-top: 5px;
       border: 1px solid #bbb;
       box-sizing: border-box;
+      font-size: 16px;
     }
     .field-row {
       display: flex;
@@ -85,53 +94,67 @@
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
     }
     th {
       background: #b2dfdb;
     }
 
-    /* Updated Popup */
-    .popup, .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    /* Popup Styling */
     .popup {
-      background: #eeeeee;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      z-index: 1001;
-      flex-direction: column;
-      width: 90%;
-      max-width: 320px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffe6f0;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      width: 300px;
+      z-index: 9999;
+      text-align: center;
     }
-    .overlay {
-      background: rgba(0,0,0,0.3);
-      z-index: 1000;
+    .popup label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      color: #880e4f;
+    }
+    .popup input {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .popup .btn {
+      margin-top: 16px;
+      width: 100%;
     }
     .hidden-popup { display: none; }
+    #timestamp {
+      font-size: 14px;
+      color: #777;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <header>
     <span>Spare Inventory Management</span>
-    <img src="5s.jpg" alt="Logo" />
+    <img src="5s.jpg" alt="Logo">
   </header>
-
   <div class="container">
     <div class="toolbar">
-      <button class="btn" onclick="showPanel('categoryPanel')">➕ Add Category</button>
-      <button class="btn" onclick="showPanel('sparePanel')">🧰 Add Spare</button>
-      <button class="btn" onclick="showPanel('availabilityPanel')">📦 See Availability</button>
-      <button class="btn" onclick="showPanel('pdfPanel')">🖨️ Export PDF</button>
+      <button class="btn btn-primary" onclick="showPanel('categoryPanel')">➕ Add Category</button>
+      <button class="btn btn-primary" onclick="showPanel('sparePanel')">🧰 Add Spare</button>
+      <button class="btn btn-primary" onclick="showPanel('availabilityPanel')">📦 See Availability</button>
+      <button class="btn btn-primary" onclick="showPanel('pdfPanel')">🖨️ Export PDF</button>
     </div>
 
+    <!-- Category Panel -->
     <div id="categoryPanel" class="panel hidden">
       <h3>➕ Add / Edit Category</h3>
       <select id="categorySelect" onchange="loadCategoryFields()">
@@ -140,41 +163,45 @@
       <input type="text" id="categoryName" placeholder="Enter Category Name">
       <div id="customFields"></div>
       <div class="action-btns">
-        <button class="btn" onclick="addCustomField()">+ Add Field</button>
-        <button class="btn" onclick="saveCategory()">💾 Save Category</button>
-        <button class="btn" onclick="deleteCategory()">🗑️ Delete Category</button>
+        <button class="btn btn-primary" onclick="addCustomField()">+ Add Field</button>
+        <button class="btn btn-success" onclick="saveCategory()">💾 Save Category</button>
+        <button class="btn btn-danger" onclick="deleteCategory()">🗑️ Delete Category</button>
       </div>
     </div>
 
+    <!-- Spare Panel -->
     <div id="sparePanel" class="panel hidden">
       <h3>🧰 Add Spare</h3>
       <select id="spareCatSelect" onchange="loadSpareFields()"></select>
       <div id="spareFields"></div>
-      <button class="btn" onclick="saveSpare()">💾 Save Spare</button>
+      <button class="btn btn-success" onclick="saveSpare()">💾 Save Spare</button>
     </div>
 
+    <!-- Availability Panel -->
     <div id="availabilityPanel" class="panel hidden">
       <h3>📦 Spare Availability</h3>
       <select id="availCatSelect" onchange="loadAvailability()"></select>
       <div id="availabilityTable"></div>
     </div>
 
+    <!-- PDF Panel -->
     <div id="pdfPanel" class="panel hidden">
       <h3>🖨️ Export PDF Report</h3>
       <select id="pdfCatSelect"></select>
-      <button class="btn" onclick="exportPDF()">📄 Generate PDF</button>
+      <button class="btn btn-success" onclick="exportPDF()">📄 Generate PDF</button>
     </div>
   </div>
 
-  <!-- Popup Window -->
+  <!-- Popup -->
   <div id="popup" class="popup hidden-popup">
-    <label>Issue Qty:</label>
-    <input type="number" id="popupIssue">
-    <label>Receive Qty:</label>
-    <input type="number" id="popupReceive">
-    <button class="btn" onclick="updateQty()">Update</button>
+    <label>Issue Qty</label>
+    <input type="number" id="popupIssue" />
+    <label>Receive Qty</label>
+    <input type="number" id="popupReceive" />
+    <div id="timestamp">Last updated: -</div>
+    <button class="btn btn-success" onclick="updateQty()">✅ Update</button>
+    <button class="btn btn-danger" onclick="closePopup()">🔙 Back</button>
   </div>
-  <div id="overlay" class="overlay hidden-popup" onclick="closePopup()"></div>
 
   <script>
     let db, selectedKey = null, selectedField = null;
@@ -187,7 +214,7 @@
     };
     openDB.onsuccess = e => {
       db = e.target.result;
-      loadSpareCategories("categorySelect");
+      refreshCategoryDropdowns();
     };
 
     function showPanel(id) {
@@ -209,11 +236,13 @@
       const name = document.getElementById("categoryName").value.trim();
       if (!name) return alert("Enter category name");
       const fields = [...document.querySelectorAll(".field-name")].map(f => f.value.trim()).filter(Boolean);
-      db.transaction("categories", "readwrite").objectStore("categories").put({ name, fields }).oncomplete = () => {
+      const tx = db.transaction("categories", "readwrite");
+      tx.objectStore("categories").put({ name, fields });
+      tx.oncomplete = () => {
         alert("Category saved");
         document.getElementById("categoryName").value = "";
         document.getElementById("customFields").innerHTML = "";
-        loadSpareCategories("categorySelect");
+        refreshCategoryDropdowns();
       };
     }
 
@@ -222,9 +251,12 @@
       if (!name) return alert("Select category to delete");
       const pass = prompt("Enter admin passcode to delete:");
       if (pass !== "!234$") return alert("Incorrect passcode!");
-      db.transaction("categories", "readwrite").objectStore("categories").delete(name).onsuccess = () => {
+      const tx = db.transaction("categories", "readwrite");
+      tx.objectStore("categories").delete(name).onsuccess = () => {
         alert("Category deleted");
-        loadSpareCategories("categorySelect");
+        refreshCategoryDropdowns();
+        document.getElementById("categoryName").value = "";
+        document.getElementById("customFields").innerHTML = "";
       };
     }
 
@@ -249,11 +281,16 @@
       };
     }
 
+    function refreshCategoryDropdowns() {
+      loadSpareCategories("categorySelect");
+    }
+
     function loadSpareCategories(targetId) {
       const ids = targetId ? [targetId] : ["spareCatSelect", "availCatSelect", "pdfCatSelect"];
       ids.forEach(id => {
         const sel = document.getElementById(id);
-        if (sel) sel.innerHTML = `<option value="">-- Select --</option>`;
+        if (!sel) return;
+        sel.innerHTML = `<option value="">-- Select --</option>`;
       });
       db.transaction("categories").objectStore("categories").getAll().onsuccess = e => {
         e.target.result.forEach(c => {
@@ -289,7 +326,7 @@
         const field = row.querySelector("[data-field]").dataset.field;
         const partNo = row.querySelector("[data-field]").value;
         const qty = parseInt(row.querySelector("[data-qty]").value) || 0;
-        fields[field] = { partNo, qty };
+        fields[field] = { partNo, qty, lastUpdated: new Date().toLocaleString() };
       });
       db.transaction("spares", "readwrite").objectStore("spares").add({ category: cat, fields });
       alert("Spare saved");
@@ -300,13 +337,15 @@
       const div = document.getElementById("availabilityTable");
       div.innerHTML = "";
       const table = document.createElement("table");
-      table.innerHTML = `<tr><th>Field</th><th>Part No.</th><th>Qty</th></tr>`;
+      table.innerHTML = `<tr><th>Field</th><th>Part No.</th><th>Qty</th><th>Last Updated</th></tr>`;
       db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
         e.target.result.forEach(s => {
           if (s.category === cat) {
             for (const key in s.fields) {
+              const field = s.fields[key];
+              const timestamp = field.lastUpdated || "-";
               const row = document.createElement("tr");
-              row.innerHTML = `<td>${key}</td><td>${s.fields[key].partNo}</td><td>${s.fields[key].qty}</td>`;
+              row.innerHTML = `<td>${key}</td><td>${field.partNo}</td><td>${field.qty}</td><td>${timestamp}</td>`;
               row.ondblclick = () => openPopup(s.id, key);
               table.appendChild(row);
             }
@@ -319,25 +358,40 @@
     function openPopup(id, field) {
       selectedKey = id;
       selectedField = field;
-      document.getElementById("popupIssue").value = 0;
-      document.getElementById("popupReceive").value = 0;
-      document.getElementById("popup").classList.remove("hidden-popup");
-      document.getElementById("overlay").classList.remove("hidden-popup");
+      document.getElementById("popupIssue").value = "";
+      document.getElementById("popupReceive").value = "";
+
+      const tx = db.transaction("spares", "readonly");
+      tx.objectStore("spares").get(id).onsuccess = e => {
+        const data = e.target.result;
+        const ts = data.fields[field]?.lastUpdated || "-";
+        document.getElementById("timestamp").innerText = `Last updated: ${ts}`;
+        document.getElementById("popup").classList.remove("hidden-popup");
+      };
     }
 
     function closePopup() {
       document.getElementById("popup").classList.add("hidden-popup");
-      document.getElementById("overlay").classList.add("hidden-popup");
     }
 
     function updateQty() {
       const issue = parseInt(document.getElementById("popupIssue").value) || 0;
       const receive = parseInt(document.getElementById("popupReceive").value) || 0;
+      const now = new Date().toLocaleString();
+
       const tx = db.transaction("spares", "readwrite");
       const store = tx.objectStore("spares");
       store.get(selectedKey).onsuccess = e => {
         const data = e.target.result;
-        data.fields[selectedField].qty = data.fields[selectedField].qty - issue + receive;
+        const current = data.fields[selectedField].qty;
+        const updatedQty = current - issue + receive;
+
+        data.fields[selectedField] = {
+          ...data.fields[selectedField],
+          qty: updatedQty,
+          lastUpdated: now
+        };
+
         store.put(data);
         closePopup();
         loadAvailability();
