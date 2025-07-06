@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spare Inventory Management</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: linear-gradient(to bottom right, #e0f7fa, #ffffff);
+      color: #333;
+    }
+    header {
+      background: linear-gradient(to right, #004d40, #00bfa5);
+      color: white;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header span {
+      margin-left: 10px;
+    }
+    header img {
+      height: 50px;
+      margin-right: 10px;
+    }
+    .container {
+      padding: 15px;
+    }
+    .btn {
+      padding: 10px 15px;
+      background: linear-gradient(to right, #00695c, #26a69a);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    .btn:hover {
+      background: linear-gradient(to right, #004d40, #00796b);
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    .panel {
+      background: #ffffffee;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .hidden { display: none; }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 5px;
+      border: 1px solid #bbb;
+      box-sizing: border-box;
+    }
+    .field-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .field-row input { flex: 1; }
+    .action-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #b2dfdb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>Spare Inventory Management</span>
+    <img src="5s.jpg" alt="Logo">
+  </header>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="showPanel('categoryPanel')">➕ Add Category</button>
+      <button class="btn" onclick="showPanel('sparePanel')">🧰 Add Spare</button>
+      <button class="btn" onclick="showPanel('availabilityPanel')">📦 See Availability</button>
+      <button class="btn" onclick="showPanel('pdfPanel')">🖨️ Export PDF</button>
+    </div>
+
+    <div id="categoryPanel" class="panel hidden">
+      <h3>➕ Add / Edit Category</h3>
+      <select id="categorySelect" onchange="loadCategoryFields()">
+        <option value="">-- New Category --</option>
+      </select>
+      <input type="text" id="categoryName" placeholder="Enter Category Name">
+      <div id="customFields"></div>
+      <div class="action-btns">
+        <button class="btn" onclick="addCustomField()">+ Add Field</button>
+        <button class="btn" onclick="saveCategory()">💾 Save Category</button>
+        <button class="btn" onclick="deleteCategory()">🗑️ Delete Category</button>
+      </div>
+    </div>
+
+    <div id="sparePanel" class="panel hidden">
+      <h3>🧰 Add Spare</h3>
+      <select id="spareCatSelect"></select>
+      <div id="spareFields"></div>
+      <button class="btn" onclick="saveSpare()">💾 Save Spare</button>
+    </div>
+
+    <div id="availabilityPanel" class="panel hidden">
+      <h3>📦 Spare Availability</h3>
+      <select id="availCatSelect" onchange="loadAvailability()"></select>
+      <div id="availabilityTable"></div>
+    </div>
+
+    <div id="pdfPanel" class="panel hidden">
+      <h3>🖨️ Export PDF Report</h3>
+      <select id="pdfCatSelect"></select>
+      <button class="btn" onclick="exportPDF()">📄 Generate PDF</button>
+    </div>
+  </div>
+
+<script>
+let db;
+
+const openDB = indexedDB.open("SpareDB", 1);
+openDB.onupgradeneeded = e => {
+  db = e.target.result;
+  db.createObjectStore("categories", { keyPath: "name" });
+  db.createObjectStore("spares", { autoIncrement: true });
+};
+openDB.onsuccess = e => {
+  db = e.target.result;
+  refreshCategoryDropdowns();
+};
+
+function showPanel(id) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  if (id === 'sparePanel') loadSpareCategories();
+  if (id === 'availabilityPanel') loadSpareCategories('availCatSelect');
+  if (id === 'pdfPanel') loadSpareCategories('pdfCatSelect');
+}
+
+function addCustomField() {
+  const div = document.createElement("div");
+  div.className = "field-row";
+  div.innerHTML = `<input type="text" class="field-name" placeholder="Field Name" />`;
+  document.getElementById("customFields").appendChild(div);
+}
+
+function saveCategory() {
+  const name = document.getElementById("categoryName").value.trim();
+  if (!name) return alert("Enter category name");
+  const fields = [...document.querySelectorAll(".field-name")].map(f => f.value.trim()).filter(Boolean);
+  const tx = db.transaction("categories", "readwrite");
+  tx.objectStore("categories").put({ name, fields });
+  tx.oncomplete = () => {
+    alert("Category saved");
+    document.getElementById("categoryName").value = "";
+    document.getElementById("customFields").innerHTML = "";
+    refreshCategoryDropdowns();
+  };
+}
+
+function deleteCategory() {
+  const name = document.getElementById("categorySelect").value;
+  if (!name) return alert("Select category to delete");
+  const pass = prompt("Enter admin passcode to delete:");
+  if (pass !== "!234$") return alert("Incorrect passcode!");
+  const tx = db.transaction("categories", "readwrite");
+  tx.objectStore("categories").delete(name).onsuccess = () => {
+    alert("Category deleted");
+    refreshCategoryDropdowns();
+    document.getElementById("categoryName").value = "";
+    document.getElementById("customFields").innerHTML = "";
+  };
+}
+
+function loadCategoryFields() {
+  const name = document.getElementById("categorySelect").value;
+  if (!name) {
+    document.getElementById("categoryName").value = "";
+    document.getElementById("customFields").innerHTML = "";
+    return;
+  }
+  db.transaction("categories").objectStore("categories").get(name).onsuccess = e => {
+    const data = e.target.result;
+    document.getElementById("categoryName").value = data.name;
+    const container = document.getElementById("customFields");
+    container.innerHTML = "";
+    data.fields.forEach(f => {
+      const div = document.createElement("div");
+      div.className = "field-row";
+      div.innerHTML = `<input type="text" class="field-name" value="${f}" />`;
+      container.appendChild(div);
+    });
+  };
+}
+
+function refreshCategoryDropdowns() {
+  loadSpareCategories("categorySelect");
+}
+
+function loadSpareCategories(targetId) {
+  const ids = targetId ? [targetId] : ["spareCatSelect", "availCatSelect", "pdfCatSelect"];
+  ids.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = `<option value="">-- Select --</option>`;
+  });
+  db.transaction("categories").objectStore("categories").getAll().onsuccess = e => {
+    e.target.result.forEach(c => {
+      ids.forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+      });
+    });
+  };
+}
+
+function saveSpare() {
+  const cat = document.getElementById("spareCatSelect").value;
+  if (!cat) return alert("Select category");
+  const fields = {};
+  document.querySelectorAll("#spareFields input").forEach(input => {
+    if (input.value.trim()) fields[input.dataset.field] = input.value.trim();
+  });
+  db.transaction("spares", "readwrite").objectStore("spares").add({ category: cat, fields });
+  alert("Spare saved");
+}
+
+function loadAvailability() {
+  const cat = document.getElementById("availCatSelect").value;
+  const table = document.getElementById("availabilityTable");
+  table.innerHTML = "";
+  const t = document.createElement("table");
+  t.innerHTML = `<tr><th>Field</th><th>Value</th></tr>`;
+  db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
+    e.target.result.forEach(s => {
+      if (s.category === cat) {
+        for (const key in s.fields) {
+          t.innerHTML += `<tr><td>${key}</td><td>${s.fields[key]}</td></tr>`;
+        }
+      }
+    });
+  };
+  table.appendChild(t);
+}
+
+function exportPDF() {
+  const cat = document.getElementById("pdfCatSelect").value;
+  db.transaction("spares").objectStore("spares").getAll().onsuccess = e => {
+    let content = `<h3>${cat} - Spare Inventory</h3><table border="1" style="width:100%;border-collapse:collapse"><tr><th>Field</th><th>Value</th></tr>`;
+    e.target.result.forEach(s => {
+      if (s.category === cat) {
+        for (const key in s.fields) {
+          content += `<tr><td>${key}</td><td>${s.fields[key]}</td></tr>`;
+        }
+      }
+    });
+    content += `</table>`;
+    const win = window.open("", "", "width=800,height=600");
+    win.document.write(`<html><head><title>${cat} Report</title></head><body>${content}</body></html>`);
+    win.print();
+  };
+}
+</script>
+</body>
+</html>
