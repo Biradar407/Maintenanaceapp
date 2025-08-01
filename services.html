@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipment Maintenance Service Log</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      background: #2d89ef;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    form, .history-section {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 10px 5px 0 0;
+      background: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1b5cb8;
+    }
+
+    .inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .inline > div {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #2d89ef;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .inline {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Equipment Maintenance Log</h2>
+
+  <form id="serviceForm">
+    <div class="inline">
+      <div>
+        <label for="equipment">Select Equipment</label>
+        <select id="equipment" required>
+          <option value="">-- Select Equipment --</option>
+        </select>
+      </div>
+      <div>
+        <label for="addEquip">Add New Equipment</label>
+        <input type="text" id="addEquip" placeholder="New Equipment Name" />
+        <button type="button" onclick="addEquipment()">➕ Add Equipment</button>
+      </div>
+    </div>
+
+    <label for="serviceType">Type of Service</label>
+    <select id="serviceType" required>
+      <option value="AMC">AMC</option>
+      <option value="B-Check">B-Check</option>
+    </select>
+
+    <label for="description">Description of Service</label>
+    <textarea id="description" rows="2" required></textarea>
+
+    <div class="inline">
+      <div>
+        <label for="runningHours">Running Hours</label>
+        <input type="number" id="runningHours" required />
+      </div>
+      <div>
+        <label for="dueOn">Due On</label>
+        <input type="date" id="dueOn" required onchange="setAlarm()" />
+      </div>
+      <div>
+        <label for="alarmOn">Alarm On (15 Days Before)</label>
+        <input type="date" id="alarmOn" readonly />
+      </div>
+    </div>
+
+    <label for="servicedOn">Servicing Done On</label>
+    <input type="date" id="servicedOn" required />
+
+    <div class="inline">
+      <div>
+        <label for="enggName">Engineer Name</label>
+        <input type="text" id="enggName" required />
+      </div>
+      <div>
+        <label for="enggMobile">Engineer Mobile</label>
+        <input type="tel" id="enggMobile" required />
+      </div>
+    </div>
+
+    <label for="spares">Spares Suggested</label>
+    <input type="text" id="spares" />
+
+    <label for="faultyParts">Faulty Parts</label>
+    <input type="text" id="faultyParts" />
+
+    <label for="pmcc">PMCC Representative</label>
+    <input type="text" id="pmcc" />
+
+    <label for="signature">Add Signature (optional)</label>
+    <input type="text" id="signature" placeholder="Your Name or Sign Ref." />
+
+    <button type="submit">💾 Save Service Entry</button>
+    <button type="button" onclick="loadHistory()">📂 Search Equipment History</button>
+    <button type="button" onclick="downloadPDF()">⬇️ Download PDF</button>
+  </form>
+
+  <div class="history-section" id="historySection" style="display:none;">
+    <h3>Service History</h3>
+    <table id="historyTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbyysOTL3Eydpi4Lj9E6ONpckHAUSMplZzNCsHcgbwPmd3ravCXpdwa1Udiki2OwszmN3Q/exec';
+
+    let equipmentList = [];
+
+    function addEquipment() {
+      const input = document.getElementById("addEquip");
+      const name = input.value.trim();
+      if (name && !equipmentList.includes(name)) {
+        equipmentList.push(name);
+        const opt = new Option(name, name);
+        document.getElementById("equipment").add(opt);
+        input.value = "";
+      }
+    }
+
+    function setAlarm() {
+      const due = document.getElementById("dueOn").value;
+      if (due) {
+        const d = new Date(due);
+        d.setDate(d.getDate() - 15);
+        document.getElementById("alarmOn").value = d.toISOString().split("T")[0];
+      }
+    }
+
+    document.getElementById("serviceForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const data = {
+        equipment: equipment.value,
+        serviceType: serviceType.value,
+        description: description.value,
+        runningHours: runningHours.value,
+        dueOn: dueOn.value,
+        alarmOn: alarmOn.value,
+        servicedOn: servicedOn.value,
+        enggName: enggName.value,
+        enggMobile: enggMobile.value,
+        spares: spares.value,
+        faultyParts: faultyParts.value,
+        pmcc: pmcc.value,
+        signature: signature.value,
+        timestamp: new Date().toISOString()
+      };
+
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {'Content-Type': 'application/json'}
+      });
+      const msg = await res.text();
+      alert(msg.includes("Success") ? "Service saved successfully!" : "Error saving service.");
+    });
+
+    async function loadHistory() {
+      const res = await fetch(API_BASE + '?type=history');
+      const json = await res.json();
+      const table = document.getElementById("historyTable");
+      const header = Object.keys(json[0] || {});
+      table.querySelector("thead").innerHTML = `<tr>${header.map(h => `<th>${h}</th>`).join('')}</tr>`;
+      table.querySelector("tbody").innerHTML = json.map(row =>
+        `<tr>${header.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`
+      ).join('');
+      document.getElementById("historySection").style.display = 'block';
+    }
+
+    function downloadPDF() {
+      const table = document.getElementById("historyTable").outerHTML;
+      const w = window.open('', '', 'width=1000,height=800');
+      w.document.write(`<html><head><title>Service History</title></head><body>${table}</body></html>`);
+      w.document.close();
+      w.print();
+    }
+  </script>
+</body>
+</html>
